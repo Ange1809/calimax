@@ -1,4 +1,4 @@
-import express from 'express';
+﻿import express from 'express';
 import tmdbRoutes from './routes/tmdb.routes.js';
 
 const app = express();

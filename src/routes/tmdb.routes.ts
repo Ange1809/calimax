@@ -1,4 +1,4 @@
-import { Router } from 'express';
+﻿import { Router } from 'express';
 import { getMetadata } from '../controllers/tmdb.controller.js';
 
 const router = Router();
