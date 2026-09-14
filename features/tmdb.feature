@@ -1,17 +1,17 @@
-Feature: Autocompletado de Metadata con TMDB
+ÔªøFeature: Autocompletado de Metadata con TMDB
   Como usuario colaborador
-  Quiero ingresar el ID de una pelÌcula
-  Para que el sistema devuelva autom·ticamente su informaciÛn oficial (tÌtulo, sinopsis, pÛster) y no escribirla a mano
+  Quiero ingresar el ID de una pel√≠cula
+  Para que el sistema devuelva autom√°ticamente su informaci√≥n oficial (t√≠tulo, sinopsis, p√≥ster) y no escribirla a mano
 
-  Scenario: Autocompletado exitoso de una pelÌcula existente
-    Given que el servidor TMDB est· funcionando correctamente
+  Scenario: Autocompletado exitoso de una pel√≠cula existente
+    Given que el servidor TMDB est√° funcionando correctamente
     When el usuario solicita la metadata del ID "27205"
-    Then el sistema debe responder con cÛdigo 200
-    And el cuerpo de la respuesta debe contener el tÌtulo "Inception"
-    And el cuerpo de la respuesta debe contener una "url_poster" v·lida
+    Then el sistema debe responder con c√≥digo 200
+    And el cuerpo de la respuesta debe contener el t√≠tulo "Inception"
+    And el cuerpo de la respuesta debe contener una "url_poster" v√°lida
 
-  Scenario: PelÌcula no encontrada en TMDB
-    Given que el servidor TMDB est· funcionando correctamente
+  Scenario: Pel√≠cula no encontrada en TMDB
+    Given que el servidor TMDB est√° funcionando correctamente
     When el usuario solicita la metadata de un ID inexistente "999999999"
-    Then el sistema debe responder con cÛdigo 404
-    And el cuerpo de la respuesta debe indicar "PelÌcula no encontrada"
+    Then el sistema debe responder con c√≥digo 404
+    And el cuerpo de la respuesta debe indicar "Pel√≠cula no encontrada"
