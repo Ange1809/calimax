@@ -1,0 +1,27 @@
+name: Integración Continua (CI) - Calimax
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Descargar el código
+      uses: actions/checkout@v3
+
+    - name: Configurar Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+
+    - name: Instalar dependencias
+      working-directory: ./calimax
+      run: npm install
+
+    - name: Ejecutar Pruebas BDD (Cucumber)
+      working-directory: ./calimax
+      run: npm run test:e2e
