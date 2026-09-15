@@ -36,4 +36,4 @@ US6 (Panel): Rutas GET /api/moderacion/pendientes y PATCH /api/moderacion/:id/es
 Módulo 4: Catálogo y Búsqueda (Miembro 4)
 
 US7 (Catálogo): Ruta GET /api/catalogo. Pública. Consultar a Prisma filtrando SOLAMENTE los de estado "PUBLICADO". Paginación por query (?page=1&limit=20). Respuesta JSON: { data: [], total, paginaActual, limite }.
-US8 (Reportes): Ruta POST /api/catalogo/enlaces/:linkId/reportar. Suma +1 a reportes. Si llega a 5, hace un UPDATE en Prisma y pasa el enlace a estado "REVISION" automáticamente
+US8 (Reportes): Ruta POST /api/catalogo/enlaces/:linkId/reportar. Suma +1 a reportes. Si llega a 5, hace un UPDATE en Prisma y pasa el enlace a estado "REVISION" automáticamente.
