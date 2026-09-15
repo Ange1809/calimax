@@ -12,9 +12,46 @@ enum Rol {
   MODERATOR
 }
 
+enum EstadoAporte {
+  PENDIENTE
+  PUBLICADO
+  RECHAZADO
+  REVISION
+}
+
 model Usuario {
-  id            String @id @default(uuid())
-  email         String @unique
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
   password_hash String
-  rol           Rol    @default(USER)
+  rol           Rol      @default(USER)
+  aportes       Aporte[]
+  createdAt     DateTime @default(now())
+}
+
+model Aporte {
+  id        Int          @id @default(autoincrement())
+  tmdbId    String
+  tipo      String
+  estado    EstadoAporte @default(PENDIENTE)
+
+  usuarioId Int
+  usuario   Usuario      @relation(fields: [usuarioId], references: [id])
+
+  enlaces   Enlace[]
+
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model Enlace {
+  id                Int      @id @default(autoincrement())
+  url               String
+  servidor          String
+  calidad           String?
+  cantidad_reportes Int      @default(0)
+
+  aporteId Int
+  aporte   Aporte @relation(fields: [aporteId], references: [id])
+
+  createdAt DateTime @default(now())
 }

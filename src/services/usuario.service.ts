@@ -13,7 +13,7 @@ export class EmailAlreadyRegisteredError extends Error {
 }
 
 export interface UsuarioPublico {
-  id: string;
+  id: number;
   email: string;
   rol: Rol;
 }
