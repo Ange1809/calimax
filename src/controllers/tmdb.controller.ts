@@ -4,13 +4,18 @@ import { TMDBService } from '../services/tmdb.service.js';
 const tmdbService = new TMDBService();
 
 export const getMetadata = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { tipo, id } = req.params;
+
+  // Validación estricta para evitar URLs rotas
+  if (tipo !== 'pelicula' && tipo !== 'tv') {
+    return res.status(400).json({ error: 'El tipo debe ser "pelicula" o "tv"' });
+  }
 
   try {
-    const metadata = await tmdbService.obtenerMetadata(id);
+    const metadata = await tmdbService.obtenerMetadata(tipo, id);
 
     if (!metadata) {
-      return res.status(404).json({ error: 'Película no encontrada' });
+      return res.status(404).json({ error: 'Multimedia no encontrada' });
     }
 
     return res.status(200).json(metadata);
