@@ -1,0 +1,57 @@
+﻿generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Rol {
+  USER
+  MODERATOR
+}
+
+enum EstadoAporte {
+  PENDIENTE
+  PUBLICADO
+  RECHAZADO
+  REVISION
+}
+
+model Usuario {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  rol       Rol      @default(USER)
+  aportes   Aporte[]
+  createdAt DateTime @default(now())
+}
+
+model Aporte {
+  id        Int          @id @default(autoincrement())
+  tmdbId    String       // Guardamos el ID de TMDB como string por si acaso
+  tipo      String       // 'pelicula' o 'tv'
+  estado    EstadoAporte @default(PENDIENTE)
+  
+  usuarioId Int
+  usuario   Usuario      @relation(fields: [usuarioId], references: [id])
+  
+  enlaces   Enlace[]
+  
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model Enlace {
+  id                Int      @id @default(autoincrement())
+  url               String
+  servidor          String   // "Vimeo", "Drive", "M3U8"
+  calidad           String?  // "1080p", "720p"
+  cantidad_reportes Int      @default(0)
+  
+  aporteId          Int
+  aporte            Aporte   @relation(fields: [aporteId], references: [id])
+  
+  createdAt         DateTime @default(now())
+}
