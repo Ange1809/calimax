@@ -20,6 +20,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     res.status(201).json(usuario);
   } catch (error: unknown) {
+    console.error("[CRASH INTERNO EN REGISTRO]:", error);
     if (error instanceof EmailAlreadyRegisteredError) {
       res.status(409).json({ error: 'Conflict' });
       return;
