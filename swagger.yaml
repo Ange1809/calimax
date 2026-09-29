@@ -1,0 +1,99 @@
+﻿openapi: 3.0.0
+info:
+  title: Calimax API
+  version: 1.0.0
+  description: API REST para indexar y descubrir contenido multimedia.
+
+servers:
+  - url: http://localhost:3000
+    description: Servidor Local
+
+paths:
+  /api/auth/register:
+    post:
+      summary: Registrar nuevo usuario
+      description: Crea un nuevo usuario en la base de datos (Zod + Bcrypt).
+      tags:
+        - Autenticación
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "usuario@ejemplo.com"
+                password:
+                  type: string
+                  minLength: 8
+                  example: "contraseñaSegura123"
+      responses:
+        '201':
+          description: Usuario registrado exitosamente.
+        '400':
+          description: Error de validación (Bad Request).
+        '409':
+          description: El email ya está registrado (Conflict).
+        '500':
+          description: Error interno del servidor.
+
+  /api/metadata/tmdb/{tipo}/{id}:
+    get:
+      summary: Autocompletar metadata desde TMDB
+      description: Busca la información de una película o programa de TV y mapea los datos limpios (Caché en memoria).
+      tags:
+        - Metadata (TMDB)
+      parameters:
+        - in: path
+          name: tipo
+          required: true
+          schema:
+            type: string
+            enum: [pelicula, tv]
+          description: El tipo de multimedia.
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: El ID oficial de TMDB.
+      responses:
+        '200':
+          description: Datos mapeados correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tmdbId:
+                    type: integer
+                  titulo:
+                    type: string
+                  sinopsis:
+                    type: string
+                  url_poster:
+                    type: string
+                  fecha_lanzamiento:
+                    type: string
+                  generos:
+                    type: array
+                    items:
+                      type: string
+                  elenco:
+                    type: array
+                    items:
+                      type: string
+                  es_envivo:
+                    type: boolean
+        '400':
+          description: El tipo debe ser "pelicula" o "tv".
+        '404':
+          description: Multimedia no encontrada en TMDB.
+        '500':
+          description: Error interno del servidor al comunicarse con TMDB.
