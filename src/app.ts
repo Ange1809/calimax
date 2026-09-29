@@ -6,6 +6,7 @@ import path from 'path';
 
 import tmdbRoutes from './routes/tmdb.routes.js';
 import usuarioRoutes from './routes/usuario.routes.js';
+import aporteRoutes from './routes/aporte.routes.js'; // Busca directo en la carpeta routes
 
 const app = express();
 
@@ -17,5 +18,6 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use('/api/auth', usuarioRoutes);
 app.use('/api/metadata', tmdbRoutes);
+app.use('/api', aporteRoutes);
 
 export default app;
