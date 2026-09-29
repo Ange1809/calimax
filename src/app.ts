@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import tmdbRoutes from './routes/tmdb.routes.js';
 import usuarioRoutes from './routes/usuario.routes.js';
-import aporteRoutes from './routes/aporte.routes'; // <-- Sin ninguna extensión
+import aporteRoutes from './routes/aporte.routes.js'; // Busca directo en la carpeta routes
 
 const app = express();
 
