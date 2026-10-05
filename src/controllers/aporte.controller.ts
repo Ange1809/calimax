@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+﻿import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -8,14 +8,14 @@ export class AporteController {
   async crearAporte(req: any, res: Response) {
     try {
       const { tmdbId, enlaces } = req.body;
-      const usuarioId = req.user?.userId; // Extraído de forma segura desde el JWT decodificado
+      const usuarioId = req.user?.userId; // ExtraÃ­do de forma segura desde el JWT decodificado
 
       if (!tmdbId || !enlaces || !Array.isArray(enlaces)) {
-        return res.status(400).json({ error: 'Estructura DTO de envío inválida' });
+        return res.status(400).json({ error: 'Estructura DTO de envÃ­o invÃ¡lida' });
       }
 
       if (!usuarioId) {
-        return res.status(401).json({ error: 'Sesión de usuario no válida o ausente' });
+        return res.status(401).json({ error: 'SesiÃ³n de usuario no vÃ¡lida o ausente' });
       }
 
       const nuevoAporte = await prisma.aporte.create({
@@ -40,7 +40,7 @@ export class AporteController {
     }
   }
 
-  // Cambiar el estado del aporte (Panel de Moderación - US6)
+  // Cambiar el estado del aporte (Panel de ModeraciÃ³n - US6)
   async cambiarEstado(req: Request, res: Response) {
     try {
       const { id } = req.params; // ID del aporte (UUID String)
@@ -61,3 +61,4 @@ export class AporteController {
     }
   }
 }
+

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+﻿import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -9,7 +9,7 @@ export class AporteService {
     return await prisma.aporte.create({
       data: {
         tmdbId,
-        usuarioId: userId, // <-- Opción 1: Conexión directa y rápida
+        usuarioId: userId, // <-- OpciÃ³n 1: ConexiÃ³n directa y rÃ¡pida
         estado: 'PENDIENTE',
         enlaces: {
           create: enlaces 
@@ -35,3 +35,4 @@ export class AporteService {
     });
   }
 }
+
