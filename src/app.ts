@@ -8,7 +8,7 @@ import { rateLimit } from 'express-rate-limit';
 
 import tmdbRoutes from './routes/tmdb.routes.js';
 import usuarioRoutes from './routes/usuario.routes.js';
-import aporteRoutes from './routes/aporte.routes.js';
+import aporteRoutes from './routes/aporte.routes.js'; // Busca directo en la carpeta routes
 
 const app = express();
 
@@ -36,5 +36,6 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use('/api/auth', authLimiter, usuarioRoutes);
 app.use('/api/aportes', aporteRoutes);
 app.use('/api/metadata', tmdbRoutes);
+app.use('/api', aporteRoutes);
 
 export default app;

@@ -1,42 +1,63 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+enum Rol {
+  USER
+  MODERATOR
+}
+
+enum EstadoAporte {
+  PENDIENTE
+  PUBLICADO
+  RECHAZADO
+  REVISION
+}
+
+enum EstadoEnlace {
+  ACTIVO
+  REVISION
 }
 
 model Usuario {
-  id            Int      @id @default(autoincrement())
+  id            String   @id @default(uuid())
   email         String   @unique
   password_hash String
-  rol       String   @default("USER")
+  rol           Rol      @default(USER)
+  createdAt     DateTime @default(now())
   aportes       Aporte[]
 }
 
-
-
 model Aporte {
-  id             Int      @id @default(autoincrement())
-  tmdb_id        Int
-  tipo           String
-  titulo         String
-  descripcion    String?
-  estado       String   @default("PENDIENTE")
-  enlaces        Enlace[]
-  usuario        Usuario  @relation(fields: [usuarioId], references: [id])
-  usuarioId      Int
+  id          String       @id @default(uuid())
+  tmdbId      String       
+  tipo        String?
+  titulo      String?
+  descripcion String?
+  estado      EstadoAporte @default(PENDIENTE) 
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  usuarioId   String
+  usuario     Usuario      @relation(fields: [usuarioId], references: [id])
+  enlaces     Enlace[]
 }
-
-
 
 model Enlace {
-  id        Int      @id @default(autoincrement())
-  url       String
-  calidad   String
-  idioma    String
-  aporte    Aporte   @relation(fields: [aporteId], references: [id])
-  aporteId  Int
-}
+  id        String       @id @default(uuid())
+  url       String       
+  servidor  String       
+  calidad   String?
+  idioma    String?
+  reportes  Int          @default(0) 
+  estado    EstadoEnlace @default(ACTIVO)
 
+  aporteId  String
+  aporte    Aporte       @relation(fields: [aporteId], references: [id], onDelete: Cascade)
+}

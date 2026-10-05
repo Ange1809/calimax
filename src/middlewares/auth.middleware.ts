@@ -1,34 +1,30 @@
-﻿import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
 export interface AuthRequest extends Request {
-  usuario?: { id: number, rol: string };
+  user?: { userId: string; rol: string };
 }
 
-export const verificarToken = (req: AuthRequest, res: Response, next: NextFunction): void => {
+export const verificarJWT = (req: any, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
-
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401).json({ error: 'Acceso denegado. Token no proporcionado o formato inválido.' });
-    return;
+    return res.status(401).json({ error: 'No autorizado' });
   }
 
   const token = authHeader.split(' ')[1];
-
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET!) as { id: number, rol: string };
-    req.usuario = payload; 
-    next(); 
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as any;
+    req.user = decoded;
+    next();
   } catch (error) {
-    res.status(403).json({ error: 'Token inválido o expirado' });
+    return res.status(401).json({ error: 'Token inválido' });
   }
 };
 
-export const requerirRol = (rolesPermitidos: string[]) => {
-  return (req: AuthRequest, res: Response, next: NextFunction): void => {
-    if (!req.usuario || !rolesPermitidos.includes(req.usuario.rol)) {
-      res.status(403).json({ error: 'No tienes los permisos necesarios para esta acción.' });
-      return;
+export const requerirRol = (role: string) => {
+  return (req: any, res: Response, next: NextFunction) => {
+    if (!req.user || req.user.rol !== role) {
+      return res.status(403).json({ error: 'Prohibido: Permisos insuficientes' });
     }
     next();
   };
