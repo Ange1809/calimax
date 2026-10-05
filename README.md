@@ -1,4 +1,10 @@
+
+
 INFORMACIÓN DEL PROYECTO (CALIMAX) Calimax es una plataforma colaborativa (API REST) para indexar y descubrir contenido multimedia. Los usuarios no suben archivos de video, sino que aportan enlaces de proveedores externos (Vimeo, Drive) o links .m3u8 (TV en vivo) asociados a un ID de película de la API externa de TMDB. Todos los aportes pasan por una máquina de estados (PENDIENTE -> APROBADO -> REVISIÓN) gestionada por Moderadores.
+
+link trello
+https://trello.com/invite/b/6aa8725c8e1c3c005776ccf2/ATTId923d431eb610f3550473cf86946146cB4404869/mi-tablero-de-trello
+
 
 2. STACK TECNOLÓGICO Y HERRAMIENTAS
 

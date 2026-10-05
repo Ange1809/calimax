@@ -1,5 +1,6 @@
-import bcrypt from 'bcrypt';
-import { Rol } from '@prisma/client';
+﻿import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+
 import { prisma } from '../lib/prisma.js';
 import { RegisterUsuarioDto } from '../schemas/usuario.schema.js';
 
@@ -7,7 +8,7 @@ const BCRYPT_SALT_ROUNDS = 10;
 
 export class EmailAlreadyRegisteredError extends Error {
   constructor() {
-    super('El email ya está registrado');
+    super('El email ya estÃ¡ registrado');
     this.name = 'EmailAlreadyRegisteredError';
   }
 }
@@ -15,7 +16,7 @@ export class EmailAlreadyRegisteredError extends Error {
 export interface UsuarioPublico {
   id: number;
   email: string;
-  rol: Rol;
+  rol: string;
 }
 
 export class UsuarioService {
@@ -44,4 +45,31 @@ export class UsuarioService {
 
     return usuario;
   }
+
+  async login(input: RegisterUsuarioDto) {
+    const usuario = await prisma.usuario.findUnique({
+      where: { email: input.email }
+    });
+
+    if (!usuario) {
+      throw new Error("CREDENCIALES_INVALIDAS");
+    }
+
+    const passwordValida = await bcrypt.compare(input.password, usuario.password_hash);
+    if (!passwordValida) {
+      throw new Error("CREDENCIALES_INVALIDAS");
+    }
+
+    const token = jwt.sign(
+      { id: usuario.id, rol: usuario.rol },
+      process.env.JWT_SECRET!,
+      { expiresIn: '15m' }
+    );
+
+    return {
+      token,
+      usuario: { id: usuario.id, email: usuario.email, rol: usuario.rol }
+    };
+  }
 }
+

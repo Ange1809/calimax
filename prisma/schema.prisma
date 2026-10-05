@@ -13,20 +13,11 @@ enum Rol {
   MODERATOR
 }
 
-model Usuario {
-  id        String   @id @default(uuid()) // <-- Cambiado a String para solucionar el error
-  email     String   @unique             
-  password  String                        
-  rol       Rol      @default(USER)       
-  createdAt DateTime @default(now())
-  
-  aportes   Aporte[]
-}
-
 enum EstadoAporte {
   PENDIENTE
   PUBLICADO
   RECHAZADO
+  REVISION
 }
 
 enum EstadoEnlace {
@@ -34,26 +25,39 @@ enum EstadoEnlace {
   REVISION
 }
 
-model Aporte {
-  id        String       @id @default(uuid()) // <-- Cambiado a String para solucionar el error
-  tmdbId    String       
-  estado    EstadoAporte @default(PENDIENTE) 
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+model Usuario {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  password_hash String
+  rol           Rol      @default(USER)
+  createdAt     DateTime @default(now())
+  aportes       Aporte[]
+}
 
-  usuarioId String
-  usuario   Usuario      @relation(fields: [usuarioId], references: [id])
-  
-  enlaces   Enlace[]
+model Aporte {
+  id          String       @id @default(uuid())
+  tmdbId      String       
+  tipo        String?
+  titulo      String?
+  descripcion String?
+  estado      EstadoAporte @default(PENDIENTE) 
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  usuarioId   String
+  usuario     Usuario      @relation(fields: [usuarioId], references: [id])
+  enlaces     Enlace[]
 }
 
 model Enlace {
-  id       String       @id @default(uuid()) // <-- Cambiado a String para solucionar el error
-  url      String       
-  servidor String       
-  reportes Int          @default(0) 
-  estado   EstadoEnlace @default(ACTIVO)
+  id        String       @id @default(uuid())
+  url       String       
+  servidor  String       
+  calidad   String?
+  idioma    String?
+  reportes  Int          @default(0) 
+  estado    EstadoEnlace @default(ACTIVO)
 
-  aporteId String
-  aporte   Aporte       @relation(fields: [aporteId], references: [id], onDelete: Cascade)
+  aporteId  String
+  aporte    Aporte       @relation(fields: [aporteId], references: [id], onDelete: Cascade)
 }
