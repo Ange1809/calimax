@@ -8,13 +8,13 @@ const BCRYPT_SALT_ROUNDS = 10;
 
 export class EmailAlreadyRegisteredError extends Error {
   constructor() {
-    super('El email ya estÃ¡ registrado');
+    super('El email ya está registrado');
     this.name = 'EmailAlreadyRegisteredError';
   }
 }
 
 export interface UsuarioPublico {
-  id: number;
+  id: string; // <-- Cambiado a string para unificarlo con tu base de datos UUID
   email: string;
   rol: string;
 }
@@ -43,7 +43,12 @@ export class UsuarioService {
       },
     });
 
-    return usuario;
+    // Mapeo seguro garantizando que el ID se devuelva como string
+    return {
+      id: String(usuario.id),
+      email: usuario.email,
+      rol: String(usuario.rol)
+    };
   }
 
   async login(input: RegisterUsuarioDto) {
@@ -68,8 +73,7 @@ export class UsuarioService {
 
     return {
       token,
-      usuario: { id: usuario.id, email: usuario.email, rol: usuario.rol }
+      usuario: { id: String(usuario.id), email: usuario.email, rol: usuario.rol }
     };
   }
 }
-
