@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+﻿import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
 export interface AuthRequest extends Request {
@@ -22,4 +22,14 @@ export const verificarToken = (req: AuthRequest, res: Response, next: NextFuncti
   } catch (error) {
     res.status(403).json({ error: 'Token inválido o expirado' });
   }
+};
+
+export const requerirRol = (rolesPermitidos: string[]) => {
+  return (req: AuthRequest, res: Response, next: NextFunction): void => {
+    if (!req.usuario || !rolesPermitidos.includes(req.usuario.rol)) {
+      res.status(403).json({ error: 'No tienes los permisos necesarios para esta acción.' });
+      return;
+    }
+    next();
+  };
 };

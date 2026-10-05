@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+﻿import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { Rol } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
@@ -8,7 +8,7 @@ const BCRYPT_SALT_ROUNDS = 10;
 
 export class EmailAlreadyRegisteredError extends Error {
   constructor() {
-    super('El email ya está registrado');
+    super('El email ya estÃ¡ registrado');
     this.name = 'EmailAlreadyRegisteredError';
   }
 }
@@ -63,7 +63,7 @@ export class UsuarioService {
     const token = jwt.sign(
       { id: usuario.id, rol: usuario.rol },
       process.env.JWT_SECRET!,
-      { expiresIn: '24h' }
+      { expiresIn: '15m' }
     );
 
     return {
