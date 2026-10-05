@@ -1,6 +1,6 @@
 ﻿import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { Rol } from '@prisma/client';
+
 import { prisma } from '../lib/prisma.js';
 import { RegisterUsuarioDto } from '../schemas/usuario.schema.js';
 
@@ -16,7 +16,7 @@ export class EmailAlreadyRegisteredError extends Error {
 export interface UsuarioPublico {
   id: number;
   email: string;
-  rol: Rol;
+  rol: string;
 }
 
 export class UsuarioService {
@@ -72,3 +72,4 @@ export class UsuarioService {
     };
   }
 }
+

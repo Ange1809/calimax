@@ -3,57 +3,40 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
-}
-
-
-enum Rol {
-  USER
-  MODERATOR
-}
-
-enum EstadoAporte {
-  PENDIENTE
-  PUBLICADO
-  RECHAZADO
-  REVISION
 }
 
 model Usuario {
   id            Int      @id @default(autoincrement())
   email         String   @unique
   password_hash String
-  rol           Rol      @default(USER)
+  rol       String   @default("USER")
   aportes       Aporte[]
-  createdAt     DateTime @default(now())
 }
+
+
 
 model Aporte {
-  id        Int          @id @default(autoincrement())
-  tmdbId    String
-  tipo      String
-  estado    EstadoAporte @default(PENDIENTE)
-
-  usuarioId Int
-  usuario   Usuario      @relation(fields: [usuarioId], references: [id])
-
-  enlaces   Enlace[]
-
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  id             Int      @id @default(autoincrement())
+  tmdb_id        Int
+  tipo           String
+  titulo         String
+  descripcion    String?
+  estado       String   @default("PENDIENTE")
+  enlaces        Enlace[]
+  usuario        Usuario  @relation(fields: [usuarioId], references: [id])
+  usuarioId      Int
 }
+
+
 
 model Enlace {
-  id                Int      @id @default(autoincrement())
-  url               String
-  servidor          String
-  calidad           String?
-  cantidad_reportes Int      @default(0)
-
-  aporteId Int
-  aporte   Aporte @relation(fields: [aporteId], references: [id])
-
-  createdAt DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  url       String
+  calidad   String
+  idioma    String
+  aporte    Aporte   @relation(fields: [aporteId], references: [id])
+  aporteId  Int
 }
+
