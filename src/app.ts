@@ -9,7 +9,6 @@ import { rateLimit } from 'express-rate-limit';
 import tmdbRoutes from './routes/tmdb.routes.js';
 import usuarioRoutes from './routes/usuario.routes.js';
 import aporteRoutes from './routes/aporte.routes.js'; // Busca directo en la carpeta routes
-import aporteRoutes from './routes/aporte.routes.js';
 
 const app = express();
 
