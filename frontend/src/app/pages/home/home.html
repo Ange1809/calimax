@@ -1,0 +1,86 @@
+<div class="home-page">
+
+  <header class="navbar">
+    <div class="logo">
+      <span>CALI</span><strong>MAX</strong>
+    </div>
+
+    <nav>
+      <a href="/home">Inicio</a>
+      <a routerLink="/catalogo">Catálogo</a>
+      <a href="#">Mis aportes</a>
+    </nav>
+
+    <button class="logout-button" (click)="cerrarSesion()">
+      Cerrar sesión
+    </button>
+  </header>
+
+  <main class="home-content">
+
+    <section class="hero">
+      <div class="hero-text">
+        <span class="hero-tag">CALIMAX</span>
+
+        <h1>
+          Descubrí contenido<br />
+          para disfrutar.
+        </h1>
+
+        <p>
+          Explorá películas y series, descubrí nuevos contenidos
+          y encontrá todo lo que querés ver.
+        </p>
+
+        <button class="primary-button" routerLink="/catalogo">
+          Explorar catálogo
+        </button>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <div class="section-header">
+        <h2>Contenido destacado</h2>
+        <a href="#">Ver todo</a>
+      </div>
+
+      <div class="content-grid">
+
+        <div class="content-card">
+          <div class="poster-placeholder"></div>
+          <div class="card-info">
+            <h3>Película destacada</h3>
+            <p>Película</p>
+          </div>
+        </div>
+
+        <div class="content-card">
+          <div class="poster-placeholder"></div>
+          <div class="card-info">
+            <h3>Serie destacada</h3>
+            <p>Serie</p>
+          </div>
+        </div>
+
+        <div class="content-card">
+          <div class="poster-placeholder"></div>
+          <div class="card-info">
+            <h3>Nuevo contenido</h3>
+            <p>Película</p>
+          </div>
+        </div>
+
+        <div class="content-card">
+          <div class="poster-placeholder"></div>
+          <div class="card-info">
+            <h3>Recomendado</h3>
+            <p>Serie</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+</div>

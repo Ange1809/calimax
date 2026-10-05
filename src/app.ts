@@ -8,11 +8,11 @@ import { rateLimit } from 'express-rate-limit';
 
 import tmdbRoutes from './routes/tmdb.routes.js';
 import usuarioRoutes from './routes/usuario.routes.js';
-import aporteRoutes from './routes/aporte.routes.js'; // Busca directo en la carpeta routes
+import aporteRoutes from './routes/aporte.routes.js';
+import catalogoRoutes from './routes/catalogo.routes.js';
 
 const app = express();
 
-// Hardening 1: CORS
 app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:3000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -21,21 +21,19 @@ app.use(cors({
 
 app.use(express.json());
 
-// Hardening 2: Rate Limiting
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
   message: 'Demasiados intentos desde esta IP, por favor intente de nuevo después de 15 minutos.'
 });
 
-// Configuración de Swagger
 const swaggerDocument = YAML.load(path.resolve('swagger.yaml'));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// Aplicar rate limiting solo a las rutas de auth
 app.use('/api/auth', authLimiter, usuarioRoutes);
 app.use('/api/aportes', aporteRoutes);
 app.use('/api/metadata', tmdbRoutes);
 app.use('/api', aporteRoutes);
+app.use('/api/catalogo', catalogoRoutes);
 
 export default app;

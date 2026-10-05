@@ -1,11 +1,11 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
 }
 
 enum Rol {
@@ -36,11 +36,11 @@ model Usuario {
 
 model Aporte {
   id          String       @id @default(uuid())
-  tmdbId      String       
+  tmdbId      String
   tipo        String?
   titulo      String?
   descripcion String?
-  estado      EstadoAporte @default(PENDIENTE) 
+  estado      EstadoAporte @default(PENDIENTE)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
@@ -51,11 +51,11 @@ model Aporte {
 
 model Enlace {
   id        String       @id @default(uuid())
-  url       String       
-  servidor  String       
+  url       String
+  servidor  String
   calidad   String?
   idioma    String?
-  reportes  Int          @default(0) 
+  reportes  Int          @default(0)
   estado    EstadoEnlace @default(ACTIVO)
 
   aporteId  String

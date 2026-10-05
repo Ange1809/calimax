@@ -1,0 +1,112 @@
+<div class="catalog-page">
+
+  <header class="catalog-header">
+    <div>
+      <span class="catalog-tag">CALIMAX</span>
+      <h1>Catálogo</h1>
+      <p>Explorá películas y series disponibles.</p>
+    </div>
+
+    <a routerLink="/home" class="back-button">
+      Volver al inicio
+    </a>
+  </header>
+
+  @if (cargando) {
+    <div class="catalog-message">
+      <p>Cargando catálogo...</p>
+    </div>
+  }
+
+  @if (error) {
+    <div class="catalog-message error">
+      <p>{{ error }}</p>
+    </div>
+  }
+
+  @if (!cargando && !error) {
+
+    <div class="catalog-info">
+      <span>
+        Página {{ paginaActual }} de {{ totalPaginas }}
+      </span>
+
+      <span>
+        {{ total }} títulos disponibles
+      </span>
+    </div>
+
+    <section class="catalog-section">
+
+      <div class="section-header">
+        <div>
+          <span class="section-tag">CATÁLOGO</span>
+          <h2>Contenido disponible</h2>
+        </div>
+      </div>
+
+      <div class="catalog-grid">
+
+        @for (contenido of contenidos; track contenido.id) {
+          <article class="catalog-card">
+
+            @if (contenido.poster) {
+              <img
+                class="poster"
+                [src]="contenido.poster"
+                [alt]="contenido.titulo || 'Contenido'"
+              />
+            } @else {
+              <div class="poster-placeholder">
+                <span>Sin imagen</span>
+              </div>
+            }
+
+            <div class="card-info">
+              <h3>{{ contenido.titulo || 'Título no disponible' }}</h3>
+
+              <div class="card-details">
+                <span>
+                  {{ contenido.tipo === 'tv' ? 'Serie' : 'Película' }}
+                </span>
+
+                @if (contenido.anio) {
+                  <span>{{ contenido.anio }}</span>
+                }
+              </div>
+            </div>
+
+          </article>
+        }
+
+      </div>
+
+    </section>
+
+    <div class="pagination">
+
+      <button
+        class="pagination-button"
+        [disabled]="paginaActual === 1"
+        (click)="paginaAnterior()"
+      >
+        ←
+      </button>
+
+      <span class="pagination-current">
+        {{ paginaActual }}
+      </span>
+
+      <button
+        class="pagination-button"
+        [disabled]="paginaActual === totalPaginas"
+        (click)="siguientePagina()"
+      >
+        →
+      </button>
+
+    </div>
+
+  }
+
+</div>
