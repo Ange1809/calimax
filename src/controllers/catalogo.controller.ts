@@ -31,9 +31,9 @@ export const getCatalogo = async (req: Request, res: Response): Promise<void> =>
     const datos = await Promise.all(
       aportes.map(async (aporte) => {
         const metadata = await tmdbService.obtenerMetadata(
-          aporte.tipo,
-          aporte.tmdbId
-        );
+  aporte.tipo || '', // <-- Agregamos || '' para evitar el riesgo de null
+  aporte.tmdbId
+);
 
         return {
           id: aporte.id,
