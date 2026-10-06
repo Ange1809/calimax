@@ -100,7 +100,10 @@
 
         @for (contenido of contenidos; track contenido.id) {
 
-          <article class="catalog-card">
+          <a 
+            class="catalog-card"
+            [routerLink]="['/detalle', contenido.tipo, contenido.tmdbId]"
+          >
 
             @if (contenido.poster) {
               <img
@@ -134,7 +137,7 @@
 
             </div>
 
-          </article>
+          </a>
 
         }
 

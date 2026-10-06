@@ -1,1 +1,83 @@
-<p>detalle works!</p>
+<div class="detail-page">
+
+  @if (cargando) {
+    <div class="detail-message">
+      <p>Cargando contenido...</p>
+    </div>
+  }
+
+  @if (error) {
+    <div class="detail-message error">
+      <p>{{ error }}</p>
+      <a routerLink="/catalogo">Volver al catálogo</a>
+    </div>
+  }
+
+  @if (!cargando && !error && contenido) {
+
+    <header class="detail-header">
+      <a routerLink="/catalogo" class="back-button">
+        ← Volver al catálogo
+      </a>
+    </header>
+
+    <main class="detail-content">
+
+      <div class="detail-poster">
+        @if (contenido.url_poster) {
+          <img
+            [src]="contenido.url_poster"
+            [alt]="contenido.titulo"
+          />
+        }
+      </div>
+
+      <div class="detail-info">
+
+        <span class="detail-tag">
+          {{ contenido.es_envivo ? 'EN VIVO' : 'CALIMAX' }}
+        </span>
+
+        <h1>{{ contenido.titulo }}</h1>
+
+        @if (contenido.fecha_lanzamiento) {
+          <p class="detail-year">
+            {{ contenido.fecha_lanzamiento.substring(0, 4) }}
+          </p>
+        }
+
+        @if (contenido.sinopsis) {
+          <p class="detail-synopsis">
+            {{ contenido.sinopsis }}
+          </p>
+        }
+
+        @if (contenido.generos?.length) {
+          <div class="detail-section">
+            <h2>Géneros</h2>
+
+            <div class="tags">
+              @for (genero of contenido.generos; track genero) {
+                <span>{{ genero }}</span>
+              }
+            </div>
+          </div>
+        }
+
+        @if (contenido.elenco?.length) {
+          <div class="detail-section">
+            <h2>Elenco</h2>
+
+            <p class="detail-cast">
+              {{ contenido.elenco.join(', ') }}
+            </p>
+          </div>
+        }
+
+      </div>
+
+    </main>
+
+  }
+
+</div>
