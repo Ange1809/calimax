@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 
 interface Contenido {
@@ -21,7 +22,7 @@ interface CatalogoResponse {
 
 @Component({
   selector: 'app-catalogo',
-  imports: [RouterLink],
+  imports: [RouterLink, FormsModule],
   templateUrl: './catalogo.html',
   styleUrl: './catalogo.css'
 })
@@ -29,6 +30,7 @@ export class Catalogo implements OnInit {
   contenidos: Contenido[] = [];
   tipoActual: 'pelicula' | 'tv' = 'pelicula';
   categoriaActual: 'ultimos' | 'mejores' | 'populares' = 'ultimos';
+  busqueda = '';
 
   paginaActual = 1;
   limite = 20;
@@ -49,9 +51,13 @@ export class Catalogo implements OnInit {
     this.cargando = true;
     this.error = '';
 
-    this.http.get<CatalogoResponse>(
-      `/api/catalogo?tipo=${this.tipoActual}&categoria=${this.categoriaActual}&page=${this.paginaActual}&limit=${this.limite}`
-    ).subscribe({
+    let url = `/api/catalogo?tipo=${this.tipoActual}&categoria=${this.categoriaActual}&page=${this.paginaActual}&limit=${this.limite}`;
+
+    if (this.busqueda.trim()) {
+      url += `&busqueda=${encodeURIComponent(this.busqueda.trim())}`;
+    }
+
+    this.http.get<CatalogoResponse>(url).subscribe({
       next: (respuesta) => {
         this.contenidos = respuesta.datos;
         this.total = respuesta.total;
@@ -67,6 +73,17 @@ export class Catalogo implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  buscar(): void {
+    this.paginaActual = 1;
+    this.cargarCatalogo();
+  }
+
+  limpiarBusqueda(): void {
+    this.busqueda = '';
+    this.paginaActual = 1;
+    this.cargarCatalogo();
   }
 
   cambiarTipo(tipo: 'pelicula' | 'tv'): void {

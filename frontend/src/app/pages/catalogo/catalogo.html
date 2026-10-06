@@ -28,6 +28,28 @@
     </button>
   </div>
 
+    <div class="search-bar">
+    <input
+      type="text"
+      [(ngModel)]="busqueda"
+      (keyup.enter)="buscar()"
+      placeholder="Buscar películas o series..."
+    />
+
+    <button (click)="buscar()">
+      Buscar
+    </button>
+
+    @if (busqueda) {
+      <button
+        class="clear-search"
+        (click)="limpiarBusqueda()"
+      >
+        Limpiar
+      </button>
+    }
+  </div>
+
   <div class="category-selector">
 
     <button
