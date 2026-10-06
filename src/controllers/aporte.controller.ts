@@ -1,16 +1,25 @@
 ﻿import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import type { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
+import { TMDBService } from '../services/tmdb.service.js';
 
 export class AporteController {
+  constructor(
+    private readonly database: Pick<PrismaClient, 'aporte'> = prisma,
+    private readonly tmdbService: Pick<TMDBService, 'buscarPeliculaPorTitulo'> = new TMDBService()
+  ) {}
+
   // Crear un aporte con sus respectivos enlaces vinculados (US5)
   async crearAporte(req: any, res: Response) {
     try {
-      const { tmdbId, enlaces } = req.body;
+      const { tmdbId, titulo, enlaces } = req.body ?? {};
       const usuarioId = req.user?.userId; // ExtraÃ­do de forma segura desde el JWT decodificado
+      const tmdbIdValido =
+        (typeof tmdbId === 'string' || typeof tmdbId === 'number') &&
+        /^\d+$/.test(String(tmdbId).trim());
+      const tituloValido = typeof titulo === 'string' && titulo.trim().length > 0;
 
-      if (!tmdbId || !enlaces || !Array.isArray(enlaces)) {
+      if ((!tmdbIdValido && !tituloValido) || !Array.isArray(enlaces)) {
         return res.status(400).json({ error: 'Estructura DTO de envÃ­o invÃ¡lida' });
       }
 
@@ -18,9 +27,23 @@ export class AporteController {
         return res.status(401).json({ error: 'SesiÃ³n de usuario no vÃ¡lida o ausente' });
       }
 
-      const nuevoAporte = await prisma.aporte.create({
+      let idPelicula = String(tmdbId).trim();
+      let tituloPelicula = tituloValido ? titulo.trim() : undefined;
+
+      if (!tmdbIdValido) {
+        const pelicula = await this.tmdbService.buscarPeliculaPorTitulo(titulo.trim());
+        if (!pelicula) {
+          return res.status(404).json({ error: 'Película no encontrada en TMDB' });
+        }
+        idPelicula = String(pelicula.tmdbId);
+        tituloPelicula = pelicula.titulo;
+      }
+
+      const nuevoAporte = await this.database.aporte.create({
         data: {
-          tmdbId: String(tmdbId),
+          tmdbId: idPelicula,
+          titulo: tituloPelicula,
+          tipo: 'pelicula',
           usuarioId: String(usuarioId),
           estado: 'PENDIENTE', // Estado inicial obligatorio por DoD
           enlaces: {
@@ -36,7 +59,7 @@ export class AporteController {
 
       return res.status(201).json({ data: nuevoAporte });
     } catch (error) {
-      return res.status(500).json({ error: 'Error al procesar el aporte en la base de datos' });
+      return res.status(500).json({ error: 'Error al procesar el aporte' });
     }
   }
 
@@ -50,7 +73,7 @@ export class AporteController {
         return res.status(400).json({ error: 'El estado solo acepta PUBLICADO o RECHAZADO' });
       }
 
-      const aporteActualizado = await prisma.aporte.update({
+      const aporteActualizado = await this.database.aporte.update({
         where: { id: String(id) },
         data: { estado },
       });

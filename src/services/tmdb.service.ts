@@ -15,6 +15,37 @@ export interface TMDBResponse {
 }
 
 export class TMDBService {
+  async buscarPeliculaPorTitulo(
+    titulo: string
+  ): Promise<{ tmdbId: number; titulo: string } | null> {
+    const params = new URLSearchParams({
+      api_key: process.env.TMDB_API_KEY || 'test_key',
+      language: 'es-MX',
+      query: titulo.trim()
+    });
+
+    try {
+      const response = await axios.get(
+        `https://api.themoviedb.org/3/search/movie?${params.toString()}`
+      );
+      const pelicula = response.data.results?.[0];
+
+      if (!pelicula) {
+        return null;
+      }
+
+      return {
+        tmdbId: pelicula.id,
+        titulo: pelicula.title
+      };
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return null;
+      }
+      throw new Error('Error al conectar con TMDB');
+    }
+  }
+
   async obtenerMetadata(tipo: string, id: string): Promise<TMDBResponse | null> {
     const cacheKey = `tmdb_${tipo}_${id}`;
     
