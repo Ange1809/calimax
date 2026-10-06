@@ -12,6 +12,47 @@
     </a>
   </header>
 
+  <div class="content-type-selector">
+    <button
+      [class.active]="tipoActual === 'pelicula'"
+      (click)="cambiarTipo('pelicula')"
+    >
+      Películas
+    </button>
+
+    <button
+      [class.active]="tipoActual === 'tv'"
+      (click)="cambiarTipo('tv')"
+    >
+      Series
+    </button>
+  </div>
+
+  <div class="category-selector">
+
+    <button
+      [class.active]="categoriaActual === 'ultimos'"
+      (click)="cambiarCategoria('ultimos')"
+    >
+      Últimos lanzamientos
+    </button>
+
+    <button
+      [class.active]="categoriaActual === 'mejores'"
+      (click)="cambiarCategoria('mejores')"
+    >
+      Mejores calificaciones
+    </button>
+
+    <button
+      [class.active]="categoriaActual === 'populares'"
+      (click)="cambiarCategoria('populares')"
+    >
+      Más populares
+    </button>
+
+  </div>
+
   @if (cargando) {
     <div class="catalog-message">
       <p>Cargando catálogo...</p>
@@ -40,14 +81,25 @@
 
       <div class="section-header">
         <div>
-          <span class="section-tag">CATÁLOGO</span>
-          <h2>Contenido disponible</h2>
+          <span class="section-tag">
+            {{ tipoActual === 'pelicula' ? 'PELÍCULAS' : 'SERIES' }}
+          </span>
+
+          <h2>
+            {{ categoriaActual === 'ultimos'
+              ? 'Últimos lanzamientos'
+              : categoriaActual === 'mejores'
+                ? 'Mejores calificaciones'
+                : 'Más populares'
+            }}
+          </h2>
         </div>
       </div>
 
       <div class="catalog-grid">
 
         @for (contenido of contenidos; track contenido.id) {
+
           <article class="catalog-card">
 
             @if (contenido.poster) {
@@ -63,9 +115,13 @@
             }
 
             <div class="card-info">
-              <h3>{{ contenido.titulo || 'Título no disponible' }}</h3>
+
+              <h3>
+                {{ contenido.titulo || 'Título no disponible' }}
+              </h3>
 
               <div class="card-details">
+
                 <span>
                   {{ contenido.tipo === 'tv' ? 'Serie' : 'Película' }}
                 </span>
@@ -73,10 +129,13 @@
                 @if (contenido.anio) {
                   <span>{{ contenido.anio }}</span>
                 }
+
               </div>
+
             </div>
 
           </article>
+
         }
 
       </div>
@@ -86,21 +145,19 @@
     <div class="pagination">
 
       <button
-        class="pagination-button"
-        [disabled]="paginaActual === 1"
         (click)="paginaAnterior()"
+        [disabled]="paginaActual === 1"
       >
         ←
       </button>
 
-      <span class="pagination-current">
-        {{ paginaActual }}
+      <span>
+        {{ paginaActual }} / {{ totalPaginas }}
       </span>
 
       <button
-        class="pagination-button"
-        [disabled]="paginaActual === totalPaginas"
         (click)="siguientePagina()"
+        [disabled]="paginaActual === totalPaginas"
       >
         →
       </button>

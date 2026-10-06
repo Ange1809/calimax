@@ -12,14 +12,18 @@ export class AporteController {
   // Crear un aporte con sus respectivos enlaces vinculados (US5)
   async crearAporte(req: any, res: Response) {
     try {
-      const { tmdbId, titulo, enlaces } = req.body ?? {};
+      const { tmdbId, titulo, tipo, enlaces } = req.body ?? {};
       const usuarioId = req.user?.userId; // ExtraÃ­do de forma segura desde el JWT decodificado
       const tmdbIdValido =
         (typeof tmdbId === 'string' || typeof tmdbId === 'number') &&
         /^\d+$/.test(String(tmdbId).trim());
       const tituloValido = typeof titulo === 'string' && titulo.trim().length > 0;
 
-      if ((!tmdbIdValido && !tituloValido) || !Array.isArray(enlaces)) {
+      if (
+        (!tmdbIdValido && !tituloValido) ||
+        !Array.isArray(enlaces) ||
+        (tipo !== undefined && tipo !== 'pelicula' && tipo !== 'tv')
+      ) {
         return res.status(400).json({ error: 'Estructura DTO de envÃ­o invÃ¡lida' });
       }
 
@@ -27,8 +31,9 @@ export class AporteController {
         return res.status(401).json({ error: 'SesiÃ³n de usuario no vÃ¡lida o ausente' });
       }
 
-      let idPelicula = String(tmdbId).trim();
-      let tituloPelicula = tituloValido ? titulo.trim() : undefined;
+      let idPelicula = tmdbIdValido ? String(tmdbId).trim() : '';
+      let tituloPelicula = tituloValido ? titulo.trim() : null;
+      let tipoMultimedia: 'pelicula' | 'tv' = tipo ?? 'pelicula';
 
       if (!tmdbIdValido) {
         const pelicula = await this.tmdbService.buscarPeliculaPorTitulo(titulo.trim());
@@ -37,27 +42,28 @@ export class AporteController {
         }
         idPelicula = String(pelicula.tmdbId);
         tituloPelicula = pelicula.titulo;
+        tipoMultimedia = 'pelicula';
       }
 
       const nuevoAporte = await this.database.aporte.create({
         data: {
           tmdbId: idPelicula,
-          titulo: tituloPelicula,
-          tipo: 'pelicula',
-          usuarioId: String(usuarioId),
+          tipo: tipoMultimedia,
+          usuarioId: Number(usuarioId),
           estado: 'PENDIENTE', // Estado inicial obligatorio por DoD
           enlaces: {
             create: enlaces.map((e: any) => ({
               url: e.url,
               servidor: e.servidor,
-              estado: 'ACTIVO'
             })),
           },
         },
         include: { enlaces: true }
       });
 
-      return res.status(201).json({ data: nuevoAporte });
+      return res.status(201).json({
+        data: { ...nuevoAporte, titulo: tituloPelicula }
+      });
     } catch (error) {
       return res.status(500).json({ error: 'Error al procesar el aporte' });
     }
@@ -66,7 +72,7 @@ export class AporteController {
   // Cambiar el estado del aporte (Panel de ModeraciÃ³n - US6)
   async cambiarEstado(req: Request, res: Response) {
     try {
-      const { id } = req.params; // ID del aporte (UUID String)
+      const { id } = req.params;
       const { estado } = req.body;
 
       if (estado !== 'PUBLICADO' && estado !== 'RECHAZADO') {
@@ -74,7 +80,7 @@ export class AporteController {
       }
 
       const aporteActualizado = await this.database.aporte.update({
-        where: { id: String(id) },
+        where: { id: Number(id) },
         data: { estado },
       });
 

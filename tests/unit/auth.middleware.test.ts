@@ -18,7 +18,7 @@ describe('verificarJWT', () => {
   });
 
   it('mapea el ID del JWT al userId usado por la aplicación', () => {
-    const userId = 'usuario-uuid-123';
+    const userId = '123';
     const token = jwt.sign({ id: userId, rol: 'USER' }, 'test-secret');
     const req: any = { headers: { authorization: `Bearer ${token}` } };
     const res: any = { status: jest.fn().mockReturnThis(), json: jest.fn() };

@@ -38,6 +38,11 @@ paths:
                   minLength: 1
                   description: Título de la película (opcional si se envía tmdbId).
                   example: The Matrix
+                tipo:
+                  type: string
+                  enum: [pelicula, tv]
+                  default: pelicula
+                  description: Tipo de contenido cuando se envía tmdbId.
                 enlaces:
                   type: array
                   items:

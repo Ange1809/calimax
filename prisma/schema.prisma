@@ -8,6 +8,38 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+model Usuario {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  password_hash String
+  rol           Rol      @default(USER)
+  createdAt     DateTime @default(now())
+  aportes       Aporte[]
+}
+
+model Aporte {
+  id        Int          @id @default(autoincrement())
+  tmdbId    String
+  tipo      String
+  estado    EstadoAporte @default(PENDIENTE)
+  usuarioId Int
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  usuario   Usuario      @relation(fields: [usuarioId], references: [id])
+  enlaces   Enlace[]
+}
+
+model Enlace {
+  id                Int      @id @default(autoincrement())
+  url               String
+  servidor          String
+  calidad           String?
+  cantidad_reportes Int      @default(0)
+  aporteId          Int
+  createdAt         DateTime @default(now())
+  aporte            Aporte   @relation(fields: [aporteId], references: [id])
+}
+
 enum Rol {
   USER
   MODERATOR
@@ -18,46 +50,4 @@ enum EstadoAporte {
   PUBLICADO
   RECHAZADO
   REVISION
-}
-
-enum EstadoEnlace {
-  ACTIVO
-  REVISION
-}
-
-model Usuario {
-  id            String   @id @default(uuid())
-  email         String   @unique
-  password_hash String
-  rol           Rol      @default(USER)
-  createdAt     DateTime @default(now())
-  aportes       Aporte[]
-}
-
-model Aporte {
-  id          String       @id @default(uuid())
-  tmdbId      String
-  tipo        String?
-  titulo      String?
-  descripcion String?
-  estado      EstadoAporte @default(PENDIENTE)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-
-  usuarioId   String
-  usuario     Usuario      @relation(fields: [usuarioId], references: [id])
-  enlaces     Enlace[]
-}
-
-model Enlace {
-  id        String       @id @default(uuid())
-  url       String
-  servidor  String
-  calidad   String?
-  idioma    String?
-  reportes  Int          @default(0)
-  estado    EstadoEnlace @default(ACTIVO)
-
-  aporteId  String
-  aporte    Aporte       @relation(fields: [aporteId], references: [id], onDelete: Cascade)
 }

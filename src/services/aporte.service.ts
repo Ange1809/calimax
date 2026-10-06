@@ -5,11 +5,12 @@ const prisma = new PrismaClient();
 export class AporteService {
   
   // US5: Guardar un nuevo aporte vinculando el usuarioId directamente
-  async crearAporte(userId: string, tmdbId: string, enlaces: { url: string; servidor: string }[]) {
+  async crearAporte(userId: string, tmdbId: string, tipo: string, enlaces: { url: string; servidor: string }[]) {
     return await prisma.aporte.create({
       data: {
         tmdbId,
-        usuarioId: userId, // <-- OpciÃ³n 1: ConexiÃ³n directa y rÃ¡pida
+        tipo,
+        usuarioId: Number(userId), // <-- OpciÃ³n 1: ConexiÃ³n directa y rÃ¡pida
         estado: 'PENDIENTE',
         enlaces: {
           create: enlaces 
@@ -30,7 +31,7 @@ export class AporteService {
   // US6: Cambiar el estado de un aporte usando su id
   async actualizarEstado(id: string, nuevoEstado: 'PUBLICADO' | 'RECHAZADO') {
     return await prisma.aporte.update({
-      where: { id },
+      where: { id: Number(id) },
       data: { estado: nuevoEstado }
     });
   }

@@ -5,7 +5,7 @@ import type { TMDBService } from '../../src/services/tmdb.service.js';
 
 describe('AporteController', () => {
   it('sigue aceptando el ID de TMDB directamente', async () => {
-    const create = jest.fn<() => Promise<{ id: string }>>().mockResolvedValue({ id: 'aporte-1' });
+    const create = jest.fn<() => Promise<{ id: number }>>().mockResolvedValue({ id: 1 });
     const database = {
       aporte: { create, update: jest.fn() }
     } as unknown as Pick<PrismaClient, 'aporte'>;
@@ -19,7 +19,7 @@ describe('AporteController', () => {
     const controller = new AporteController(database, tmdbService);
     const req: any = {
       body: { tmdbId: '603', enlaces: [] },
-      user: { userId: 'usuario-1' }
+      user: { userId: '1' }
     };
     const res: any = { status: jest.fn().mockReturnThis(), json: jest.fn() };
 
@@ -27,13 +27,13 @@ describe('AporteController', () => {
 
     expect(buscarPeliculaPorTitulo).not.toHaveBeenCalled();
     expect(create).toHaveBeenCalledWith(expect.objectContaining({
-      data: expect.objectContaining({ tmdbId: '603' })
+      data: expect.objectContaining({ tmdbId: '603', tipo: 'pelicula', usuarioId: 1 })
     }));
     expect(res.status).toHaveBeenCalledWith(201);
   });
 
   it('acepta el título de una película y guarda el ID resuelto por TMDB', async () => {
-    const create = jest.fn<() => Promise<{ id: string }>>().mockResolvedValue({ id: 'aporte-1' });
+    const create = jest.fn<() => Promise<{ id: number }>>().mockResolvedValue({ id: 1 });
     const database = {
       aporte: { create, update: jest.fn() }
     } as unknown as Pick<PrismaClient, 'aporte'>;
@@ -50,7 +50,7 @@ describe('AporteController', () => {
     const controller = new AporteController(database, tmdbService);
     const req: any = {
       body: { titulo: 'The Matrix', enlaces: [{ url: 'https://example.com', servidor: 'WEB' }] },
-      user: { userId: 'usuario-1' }
+      user: { userId: '42' }
     };
     const res: any = { status: jest.fn().mockReturnThis(), json: jest.fn() };
 
@@ -60,12 +60,14 @@ describe('AporteController', () => {
     expect(create).toHaveBeenCalledWith(expect.objectContaining({
       data: expect.objectContaining({
         tmdbId: '603',
-        titulo: 'The Matrix',
         tipo: 'pelicula',
-        usuarioId: 'usuario-1'
+        usuarioId: 42
       })
     }));
     expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ titulo: 'The Matrix' })
+    }));
   });
 
   it('devuelve 404 y no crea el aporte cuando TMDB no encuentra el título', async () => {
@@ -81,7 +83,7 @@ describe('AporteController', () => {
     const controller = new AporteController(database, tmdbService);
     const req: any = {
       body: { titulo: 'Título inexistente', enlaces: [] },
-      user: { userId: 'usuario-1' }
+      user: { userId: '42' }
     };
     const res: any = { status: jest.fn().mockReturnThis(), json: jest.fn() };
 

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
@@ -27,13 +27,19 @@ interface CatalogoResponse {
 })
 export class Catalogo implements OnInit {
   contenidos: Contenido[] = [];
+  tipoActual: 'pelicula' | 'tv' = 'pelicula';
+  categoriaActual: 'ultimos' | 'mejores' | 'populares' = 'ultimos';
+
   paginaActual = 1;
   limite = 20;
   total = 0;
   cargando = true;
   error = '';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.cargarCatalogo();
@@ -44,7 +50,7 @@ export class Catalogo implements OnInit {
     this.error = '';
 
     this.http.get<CatalogoResponse>(
-      `/api/catalogo?page=${this.paginaActual}&limit=${this.limite}`
+      `/api/catalogo?tipo=${this.tipoActual}&categoria=${this.categoriaActual}&page=${this.paginaActual}&limit=${this.limite}`
     ).subscribe({
       next: (respuesta) => {
         this.contenidos = respuesta.datos;
@@ -52,19 +58,31 @@ export class Catalogo implements OnInit {
         this.paginaActual = respuesta.paginaActual;
         this.limite = respuesta.limite;
         this.cargando = false;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error al cargar el catálogo:', error);
         this.error = 'No se pudo cargar el catálogo.';
         this.cargando = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
-  siguientePagina(): void {
-    const totalPaginas = Math.ceil(this.total / this.limite);
+  cambiarTipo(tipo: 'pelicula' | 'tv'): void {
+    this.tipoActual = tipo;
+    this.paginaActual = 1;
+    this.cargarCatalogo();
+  }
 
-    if (this.paginaActual < totalPaginas) {
+  cambiarCategoria(categoria: 'ultimos' | 'mejores' | 'populares'): void {
+    this.categoriaActual = categoria;
+    this.paginaActual = 1;
+    this.cargarCatalogo();
+  }
+
+  siguientePagina(): void {
+    if (this.paginaActual < this.totalPaginas) {
       this.paginaActual++;
       this.cargarCatalogo();
     }
