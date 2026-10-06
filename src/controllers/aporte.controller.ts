@@ -1,5 +1,5 @@
 ﻿import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, EstadoAporte } from '@prisma/client'; // <-- Importamos el Enum nativo generado
 
 const prisma = new PrismaClient();
 
@@ -8,26 +8,27 @@ export class AporteController {
   async crearAporte(req: any, res: Response) {
     try {
       const { tmdbId, enlaces } = req.body;
-      const usuarioId = req.user?.userId; // ExtraÃ­do de forma segura desde el JWT decodificado
+      const usuarioId = req.user?.userId; // Extraído de forma segura desde el JWT decodificado
 
       if (!tmdbId || !enlaces || !Array.isArray(enlaces)) {
-        return res.status(400).json({ error: 'Estructura DTO de envÃ­o invÃ¡lida' });
+        return res.status(400).json({ error: 'Estructura DTO de envío inválida' });
       }
 
       if (!usuarioId) {
-        return res.status(401).json({ error: 'SesiÃ³n de usuario no vÃ¡lida o ausente' });
+        return res.status(401).json({ error: 'Sesión de usuario no válida o ausente' });
       }
 
       const nuevoAporte = await prisma.aporte.create({
         data: {
-          tmdbId: String(tmdbId),
+tmdbId: parseInt(tmdbId, 10) as any as string, // <-- Solución para obligar al editor a aceptar el Int
           usuarioId: String(usuarioId),
-          estado: 'PENDIENTE', // Estado inicial obligatorio por DoD
+          estado: EstadoAporte.PENDIENTE, // <-- Usamos el Enum tipado oficial
           enlaces: {
             create: enlaces.map((e: any) => ({
-              url: e.url,
-              servidor: e.servidor,
-              estado: 'ACTIVO'
+              url: String(e.url),
+              servidor: String(e.servidor),
+             estado: 'PENDIENTE' as any
+
             })),
           },
         },
@@ -36,23 +37,24 @@ export class AporteController {
 
       return res.status(201).json({ data: nuevoAporte });
     } catch (error) {
+      console.error(error);
       return res.status(500).json({ error: 'Error al procesar el aporte en la base de datos' });
     }
   }
 
-  // Cambiar el estado del aporte (Panel de ModeraciÃ³n - US6)
+  // Cambiar el estado del aporte (Panel de Moderación - US6)
   async cambiarEstado(req: Request, res: Response) {
     try {
       const { id } = req.params; // ID del aporte (UUID String)
       const { estado } = req.body;
 
-      if (estado !== 'PUBLICADO' && estado !== 'RECHAZADO') {
-        return res.status(400).json({ error: 'El estado solo acepta PUBLICADO o RECHAZADO' });
+      if (estado !== 'PUBLICADO' && estado !== 'RECHAZADO' && estado !== 'REVISION') {
+        return res.status(400).json({ error: 'El estado solo acepta PUBLICADO, RECHAZADO o REVISION' });
       }
 
       const aporteActualizado = await prisma.aporte.update({
         where: { id: String(id) },
-        data: { estado },
+        data: { estado: estado as EstadoAporte }, // <-- Forzamos el casteo al Enum de Prisma
       });
 
       return res.status(200).json({ data: aporteActualizado });
@@ -61,4 +63,3 @@ export class AporteController {
     }
   }
 }
-
