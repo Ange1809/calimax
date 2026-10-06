@@ -6,7 +6,7 @@
     </div>
 
     <nav>
-      <a href="/home">Inicio</a>
+      <a routerLink="/home">Inicio</a>
       <a routerLink="/catalogo">Catálogo</a>
       <a href="#">Mis aportes</a>
     </nav>
@@ -39,48 +39,66 @@
     </section>
 
     <section class="content-section">
-      <div class="section-header">
-        <h2>Contenido destacado</h2>
-        <a href="#">Ver todo</a>
+      <section class="content-section">
+  <div class="section-header">
+    <h2>Contenido destacado</h2>
+    <a routerLink="/catalogo">Ver todo</a>
+  </div>
+
+  @if (cargando) {
+    <div class="content-grid">
+      <div class="content-card">
+        <div class="poster-placeholder"></div>
       </div>
 
-      <div class="content-grid">
-
-        <div class="content-card">
-          <div class="poster-placeholder"></div>
-          <div class="card-info">
-            <h3>Película destacada</h3>
-            <p>Película</p>
-          </div>
-        </div>
-
-        <div class="content-card">
-          <div class="poster-placeholder"></div>
-          <div class="card-info">
-            <h3>Serie destacada</h3>
-            <p>Serie</p>
-          </div>
-        </div>
-
-        <div class="content-card">
-          <div class="poster-placeholder"></div>
-          <div class="card-info">
-            <h3>Nuevo contenido</h3>
-            <p>Película</p>
-          </div>
-        </div>
-
-        <div class="content-card">
-          <div class="poster-placeholder"></div>
-          <div class="card-info">
-            <h3>Recomendado</h3>
-            <p>Serie</p>
-          </div>
-        </div>
-
+      <div class="content-card">
+        <div class="poster-placeholder"></div>
       </div>
-    </section>
 
-  </main>
+      <div class="content-card">
+        <div class="poster-placeholder"></div>
+      </div>
 
-</div>
+      <div class="content-card">
+        <div class="poster-placeholder"></div>
+      </div>
+    </div>
+  }
+
+  @if (!cargando) {
+    <div class="content-grid">
+
+      @for (contenido of recomendaciones; track contenido.id) {
+        <article class="content-card">
+
+          @if (contenido.poster) {
+            <img
+              class="poster"
+              [src]="contenido.poster"
+              [alt]="contenido.titulo || 'Contenido'"
+            />
+          } @else {
+            <div class="poster-placeholder">
+              <span>Sin imagen</span>
+            </div>
+          }
+
+          <div class="card-info">
+            <h3>
+              {{ contenido.titulo || 'Título no disponible' }}
+            </h3>
+
+            <p>
+              {{ contenido.tipo === 'tv' ? 'Serie' : 'Película' }}
+              @if (contenido.anio) {
+                · {{ contenido.anio }}
+              }
+            </p>
+          </div>
+
+        </article>
+      }
+
+    </div>
+  }
+</section>

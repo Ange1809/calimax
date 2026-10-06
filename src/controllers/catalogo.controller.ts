@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { prisma } from '../lib/prisma.js';
 import { TMDBService } from '../services/tmdb.service.js';
 
 const tmdbService = new TMDBService();
@@ -7,51 +6,34 @@ const tmdbService = new TMDBService();
 export const getCatalogo = async (req: Request, res: Response): Promise<void> => {
   try {
     const page = Math.max(Number(req.query.page) || 1, 1);
-    const limit = Math.max(Number(req.query.limit) || 20, 1);
-    const skip = (page - 1) * limit;
+    const limit = Math.min(Math.max(Number(req.query.limit) || 20, 1), 20);
+    const tipo = req.query.tipo === 'tv' ? 'tv' : 'pelicula';
+    const categoria =
+      req.query.categoria === 'mejores'
+        ? 'mejores'
+        : req.query.categoria === 'populares'
+          ? 'populares'
+          : 'ultimos';
 
-    const [aportes, total] = await Promise.all([
-      prisma.aporte.findMany({
-        where: {
-          estado: 'PUBLICADO'
-        },
-        skip,
-        take: limit,
-        orderBy: {
-          createdAt: 'desc'
-        }
-      }),
-      prisma.aporte.count({
-        where: {
-          estado: 'PUBLICADO'
-        }
-      })
-    ]);
-
-    const datos = await Promise.all(
-      aportes.map(async (aporte) => {
-        const metadata = await tmdbService.obtenerMetadata(
-  aporte.tipo || '', // <-- Agregamos || '' para evitar el riesgo de null
-  aporte.tmdbId
-);
-
-        return {
-          id: aporte.id,
-          tmdbId: aporte.tmdbId,
-          tipo: aporte.tipo,
-          estado: aporte.estado,
-          titulo: metadata?.titulo ?? 'Título no disponible',
-          poster: metadata?.url_poster ?? null,
-          anio: metadata?.fecha_lanzamiento
-            ? metadata.fecha_lanzamiento.substring(0, 4)
-            : null
-        };
-      })
+    const datos = await tmdbService.obtenerCatalogo(
+      tipo,
+      categoria,
+      page
     );
 
     res.status(200).json({
-      datos,
-      total,
+      datos: datos.slice(0, limit).map((item) => ({
+        id: item.tmdbId,
+        tmdbId: String(item.tmdbId),
+        tipo: item.tipo,
+        estado: 'PUBLICADO',
+        titulo: item.titulo,
+        poster: item.url_poster || null,
+        anio: item.fecha_lanzamiento
+          ? item.fecha_lanzamiento.substring(0, 4)
+          : null
+      })),
+      total: 100,
       paginaActual: page,
       limite: limit
     });

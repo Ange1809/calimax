@@ -7,7 +7,7 @@ export class AporteController {
   // Crear un aporte con sus respectivos enlaces vinculados (US5)
   async crearAporte(req: any, res: Response) {
     try {
-      const { tmdbId, enlaces } = req.body;
+      const { tmdbId, tipo, enlaces } = req.body;
       const usuarioId = req.user?.userId; // ExtraÃ­do de forma segura desde el JWT decodificado
 
       if (!tmdbId || !enlaces || !Array.isArray(enlaces)) {
@@ -21,13 +21,13 @@ export class AporteController {
       const nuevoAporte = await prisma.aporte.create({
         data: {
           tmdbId: String(tmdbId),
-          usuarioId: String(usuarioId),
+          tipo: String(tipo),
+          usuarioId: Number(usuarioId),
           estado: 'PENDIENTE', // Estado inicial obligatorio por DoD
           enlaces: {
             create: enlaces.map((e: any) => ({
               url: e.url,
               servidor: e.servidor,
-              estado: 'ACTIVO'
             })),
           },
         },
@@ -51,7 +51,7 @@ export class AporteController {
       }
 
       const aporteActualizado = await prisma.aporte.update({
-        where: { id: String(id) },
+        where: { id: Number(id) },
         data: { estado },
       });
 
