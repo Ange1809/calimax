@@ -4,6 +4,7 @@ import { Register } from './pages/register/register';
 import { Home } from './pages/home/home';
 import { authGuard } from './guards/auth-guard';
 import { Catalogo } from './pages/catalogo/catalogo';
+import { Detalle } from './pages/detalle/detalle';
 
 export const routes: Routes = [
   {
@@ -28,5 +29,10 @@ export const routes: Routes = [
   path: 'catalogo',
   component: Catalogo,
   canActivate: [authGuard]
-  }
+  },
+  {
+  path: 'detalle/:tipo/:id',
+  component: Detalle,
+  canActivate: [authGuard]
+}
 ];

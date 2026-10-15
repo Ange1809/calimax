@@ -7,7 +7,9 @@ export const getCatalogo = async (req: Request, res: Response): Promise<void> =>
   try {
     const page = Math.max(Number(req.query.page) || 1, 1);
     const limit = Math.min(Math.max(Number(req.query.limit) || 20, 1), 20);
+
     const tipo = req.query.tipo === 'tv' ? 'tv' : 'pelicula';
+
     const categoria =
       req.query.categoria === 'mejores'
         ? 'mejores'
@@ -15,14 +17,19 @@ export const getCatalogo = async (req: Request, res: Response): Promise<void> =>
           ? 'populares'
           : 'ultimos';
 
-    const datos = await tmdbService.obtenerCatalogo(
+    const busqueda = typeof req.query.busqueda === 'string'
+      ? req.query.busqueda.trim()
+      : '';
+
+    const resultado = await tmdbService.obtenerCatalogo(
       tipo,
       categoria,
-      page
+      page,
+      busqueda
     );
 
     res.status(200).json({
-      datos: datos.slice(0, limit).map((item) => ({
+      datos: resultado.datos.slice(0, limit).map((item) => ({
         id: item.tmdbId,
         tmdbId: String(item.tmdbId),
         tipo: item.tipo,
@@ -33,7 +40,7 @@ export const getCatalogo = async (req: Request, res: Response): Promise<void> =>
           ? item.fecha_lanzamiento.substring(0, 4)
           : null
       })),
-      total: 100,
+      total: resultado.total,
       paginaActual: page,
       limite: limit
     });
