@@ -3,29 +3,48 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+async function validarEnlaceExterno(url: string): Promise<boolean> {
+  return url.startsWith('http://') || url.startsWith('https://');
+}
+
 export class AporteController {
-  // Crear un aporte con sus respectivos enlaces vinculados (US5)
   async crearAporte(req: any, res: Response) {
     try {
       const { tmdbId, tipo, enlaces } = req.body;
-      const usuarioId = req.user?.userId; // ExtraÃ­do de forma segura desde el JWT decodificado
+      
+      const requestContext = req as any;
+      const tokenUser = requestContext.user;
+
+      if (!tokenUser || !tokenUser.userId) {
+        return res.status(401).json({ error: 'Sesión de usuario no válida o ausente' });
+      }
+
+      // CORRECCIÓN: Prisma espera un String para el usuarioId
+      const usuarioIdStr: string = String(tokenUser.userId);
 
       if (!tmdbId || !enlaces || !Array.isArray(enlaces)) {
-        return res.status(400).json({ error: 'Estructura DTO de envÃ­o invÃ¡lida' });
+        return res.status(400).json({ error: 'Estructura DTO de envío inválida' });
       }
 
-      if (!usuarioId) {
-        return res.status(401).json({ error: 'SesiÃ³n de usuario no vÃ¡lida o ausente' });
-      }
+      // R2.3 — Procesamiento en paralelo de los enlaces recibidos
+      const enlacesValidados = await Promise.all(
+        enlaces.map(async (e: any) => {
+          await validarEnlaceExterno(e.url);
+          return {
+            url: e.url,
+            servidor: e.servidor,
+          };
+        })
+      );
 
       const nuevoAporte = await prisma.aporte.create({
         data: {
           tmdbId: String(tmdbId),
           tipo: String(tipo),
-          usuarioId: Number(usuarioId),
-          estado: 'PENDIENTE', // Estado inicial obligatorio por DoD
+          usuarioId: usuarioIdStr, // Guardado como String perfectamente
+          estado: 'PENDIENTE',
           enlaces: {
-            create: enlaces.map((e: any) => ({
+            create: enlacesValidados.map((e) => ({
               url: e.url,
               servidor: e.servidor,
             })),
@@ -40,18 +59,18 @@ export class AporteController {
     }
   }
 
-  // Cambiar el estado del aporte (Panel de ModeraciÃ³n - US6)
   async cambiarEstado(req: Request, res: Response) {
     try {
-      const { id } = req.params; // ID del aporte (UUID String)
+      const { id } = req.params;
       const { estado } = req.body;
 
       if (estado !== 'PUBLICADO' && estado !== 'RECHAZADO') {
         return res.status(400).json({ error: 'El estado solo acepta PUBLICADO o RECHAZADO' });
       }
 
+      // CORRECCIÓN: El ID del aporte también viene tipado como String en Prisma
       const aporteActualizado = await prisma.aporte.update({
-        where: { id: Number(id) },
+        where: { id: String(id) }, 
         data: { estado },
       });
 
@@ -61,4 +80,3 @@ export class AporteController {
     }
   }
 }
-
