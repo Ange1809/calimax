@@ -1,0 +1,52 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: ${DATABASE_URL:-postgresql://calimax:calimax@db:5432/calimax?schema=public}
+      DIRECT_URL: ${DIRECT_URL:-${DATABASE_URL:-postgresql://calimax:calimax@db:5432/calimax?schema=public}}
+      JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en .env}
+      TMDB_API_KEY: ${TMDB_API_KEY:?Define TMDB_API_KEY en .env}
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - calimax-network
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-calimax}
+      POSTGRES_USER: ${POSTGRES_USER:-calimax}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-calimax}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./.docker/postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - calimax-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+    networks:
+      - calimax-network
+
+networks:
+  calimax-network:
+    driver: bridge
