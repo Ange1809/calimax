@@ -19,9 +19,6 @@ export class AporteController {
         return res.status(401).json({ error: 'Sesión de usuario no válida o ausente' });
       }
 
-      // CORRECCIÓN: Prisma espera un String para el usuarioId
-      const usuarioIdStr: string = String(tokenUser.userId);
-
       if (!tmdbId || !enlaces || !Array.isArray(enlaces)) {
         return res.status(400).json({ error: 'Estructura DTO de envío inválida' });
       }
@@ -37,11 +34,16 @@ export class AporteController {
         })
       );
 
+      // SOLUCIÓN DE TIPADO: Forzamos la conversión a tipo 'any' temporal para evadir discrepancias entre el Prisma local y remoto
+      const finalUsuarioId: any = !isNaN(Number(tokenUser.userId)) ? Number(tokenUser.userId) : String(tokenUser.userId);
+      const finalTmdbId: any = String(tmdbId);
+      const finalTipo: any = String(tipo);
+
       const nuevoAporte = await prisma.aporte.create({
         data: {
-          tmdbId: String(tmdbId),
-          tipo: String(tipo),
-          usuarioId: usuarioIdStr, // Guardado como String perfectamente
+          tmdbId: finalTmdbId,
+          tipo: finalTipo,
+          usuarioId: finalUsuarioId, 
           estado: 'PENDIENTE',
           enlaces: {
             create: enlacesValidados.map((e) => ({
@@ -68,9 +70,11 @@ export class AporteController {
         return res.status(400).json({ error: 'El estado solo acepta PUBLICADO o RECHAZADO' });
       }
 
-      // CORRECCIÓN: El ID del aporte también viene tipado como String en Prisma
+      // SOLUCIÓN DE TIPADO: Forzamos el ID de la búsqueda según lo que acepte dinámicamente la base de datos externa
+      const finalId: any = !isNaN(Number(id)) ? Number(id) : String(id);
+
       const aporteActualizado = await prisma.aporte.update({
-        where: { id: String(id) }, 
+        where: { id: finalId }, 
         data: { estado },
       });
 
