@@ -9,7 +9,7 @@ export class AporteService {
       data: {
         tmdbId: String(tmdbId),
         tipo: String(tipo),
-        usuarioId: String(userId), // 👈 CORREGIDO: Cambiado de Number() a String()
+        usuarioId: Number(userId),
         estado: 'PENDIENTE',
         enlaces: {
           create: enlaces.map((e) => ({
@@ -25,7 +25,7 @@ export class AporteService {
   // Actualizar el estado de un aporte (Panel de moderación)
   async actualizarEstado(id: string, estado: 'PUBLICADO' | 'RECHAZADO') {
     return await prisma.aporte.update({
-      where: { id: String(id) }, // 👈 CORREGIDO: Cambiado de Number() a String()
+      where: { id: Number(id) },
       data: { estado },
     });
   }

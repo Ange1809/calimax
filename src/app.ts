@@ -21,11 +21,31 @@ app.use(cors({
 
 app.use(express.json());
 
+const globalLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiadas peticiones desde esta IP, por favor intente de nuevo más tarde.' }
+});
+
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
-  message: 'Demasiados intentos desde esta IP, por favor intente de nuevo después de 15 minutos.'
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos de autenticación, por favor intente de nuevo después de 15 minutos.' }
 });
+
+const reportLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Has alcanzado el límite de reportes permitidos. Intenta nuevamente en 15 minutos.' }
+});
+
+app.use(globalLimiter);
 
 const swaggerDocument = YAML.load(path.resolve('swagger.yaml'));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
@@ -34,6 +54,9 @@ app.use('/api/auth', authLimiter, usuarioRoutes);
 app.use('/api/aportes', aporteRoutes);
 app.use('/api/metadata', tmdbRoutes);
 app.use('/api', aporteRoutes);
+
+app.post('/api/catalogo/enlaces/:linkId/reportar', reportLimiter);
+
 app.use('/api/catalogo', catalogoRoutes);
 
 export default app;

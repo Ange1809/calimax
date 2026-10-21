@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import { TMDBService } from '../services/tmdb.service.js';
+import { PrismaClient } from '@prisma/client';
 
 const tmdbService = new TMDBService();
+const prisma = new PrismaClient();
 
 export const getCatalogo = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -48,6 +50,31 @@ export const getCatalogo = async (req: Request, res: Response): Promise<void> =>
     console.error('Error al obtener el catálogo:', error);
     res.status(500).json({
       error: 'Error interno del servidor'
+    });
+  }
+};
+
+export const reportarEnlace = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { linkId } = req.params;
+    const finalId: any = !isNaN(Number(linkId)) ? Number(linkId) : String(linkId);
+
+    // R3.4 — Operación atómica con Prisma para evitar Race Conditions
+    const enlaceActualizado = await prisma.enlace.update({
+      where: { id: finalId },
+      data: {
+        reportes: { increment: 1 }
+      } as any 
+    });
+
+    res.status(200).json({
+      message: 'Enlace reportado exitosamente',
+      data: enlaceActualizado
+    });
+  } catch (error) {
+    console.error('Error al reportar enlace:', error);
+    res.status(404).json({
+      error: 'Enlace no encontrado o error al procesar el reporte'
     });
   }
 };
