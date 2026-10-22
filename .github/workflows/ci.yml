@@ -19,7 +19,16 @@ jobs:
         node-version: '20'
 
     - name: Instalar dependencias
-      run: npm install
+      run: npm ci
+
+    - name: Verificar compilación
+      run: npm run build
+
+    - name: Verificar estándares de código
+      run: npm run lint
+
+    - name: Verificar formato
+      run: npm run format:check
 
     - name: Ejecutar Pruebas BDD (Cucumber)
       run: npm run test:e2e

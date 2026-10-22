@@ -89,4 +89,19 @@ export class AporteController {
       return res.status(404).json({ error: 'Aporte no encontrado' });
     }
   }
+
+  async listarPendientes(_req: Request, res: Response) {
+    try {
+      const aportes = await this.database.aporte.findMany({
+        where: { estado: 'PENDIENTE' },
+        include: { enlaces: true, usuario: true },
+        orderBy: { id: 'asc' },
+      });
+
+      return res.status(200).json({ data: aportes });
+    } catch (error) {
+      console.error('Error al listar aportes pendientes:', error);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  }
 }

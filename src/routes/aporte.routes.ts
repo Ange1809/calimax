@@ -9,6 +9,7 @@ const aporteController = new AporteController();
 router.post('/aportes', verificarJWT, (req, res) => aporteController.crearAporte(req, res));
 
 // US6: Panel de moderación
+router.get('/moderacion/pendientes', verificarJWT, requerirRol('MODERATOR'), (req, res) => aporteController.listarPendientes(req, res));
 router.patch('/moderacion/:id/estado', verificarJWT, requerirRol('MODERATOR'), (req, res) => aporteController.cambiarEstado(req, res));
 
 export default router;

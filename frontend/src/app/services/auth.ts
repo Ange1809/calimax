@@ -20,7 +20,7 @@ interface LoginResponse {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class Auth {
   private apiUrl = '/api/auth';
@@ -28,30 +28,18 @@ export class Auth {
   constructor(private http: HttpClient) {}
 
   registrar(email: string, password: string): Observable<RegistroResponse> {
-    return this.http.post<RegistroResponse>(
-      `${this.apiUrl}/register`,
-      {
-        email,
-        password
-      }
-    );
+    return this.http.post<RegistroResponse>(`${this.apiUrl}/register`, {
+      email,
+      password,
+    });
   }
 
   login(email: string, password: string): Observable<LoginResponse> {
-  const respuesta: LoginResponse = {
-    token: 'token-temporal-calimax',
-    usuario: {
-      id: 1,
+    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, {
       email,
-      rol: 'USER'
-    }
-  };
-
-  return new Observable((observer) => {
-    observer.next(respuesta);
-    observer.complete();
-  });
-}
+      password,
+    });
+  }
 
   guardarToken(token: string): void {
     localStorage.setItem('token', token);
