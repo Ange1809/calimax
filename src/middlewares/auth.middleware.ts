@@ -13,8 +13,20 @@ export const verificarJWT = (req: any, res: Response, next: NextFunction) => {
 
   const token = authHeader.split(' ')[1];
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as any;
-    req.user = decoded;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as jwt.JwtPayload;
+    const id = decoded.id;
+    const userId =
+      typeof id === 'number' && Number.isSafeInteger(id) && id > 0
+        ? String(id)
+        : typeof id === 'string' && /^[1-9]\d*$/.test(id)
+          ? id
+          : null;
+
+    if (userId === null || typeof decoded.rol !== 'string') {
+      return res.status(401).json({ error: 'Token inválido' });
+    }
+
+    req.user = { userId, rol: decoded.rol };
     next();
   } catch (error) {
     return res.status(401).json({ error: 'Token inválido' });

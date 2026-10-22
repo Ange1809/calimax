@@ -18,6 +18,14 @@ Sincronizar Prisma con la BD local: npx prisma db push
 Generar cliente de Prisma: npx prisma generate
 Levantar el servidor en desarrollo: npm run dev
 Correr las pruebas BDD: npm run test:e2e
+
+## Ejecución con Docker
+
+1. Copia `.env.example` a `.env` y configura `JWT_SECRET` y `TMDB_API_KEY`.
+2. Inicia los servicios con `docker compose up --build`.
+3. Abre el frontend en `http://localhost:8080`; la API está disponible en `http://localhost:3000`.
+
+PostgreSQL queda disponible en `localhost:5432` y sus datos persisten en `.docker/postgres-data/`.
 4. REGLAS DE ARQUITECTURA (OBLIGATORIO)
 
 Capas estritas: Separar código en Routes -> Controllers -> Services.

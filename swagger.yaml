@@ -9,6 +9,64 @@ servers:
     description: Servidor Local
 
 paths:
+  /api/aportes:
+    post:
+      summary: Crear un aporte de película
+      description: Acepta un ID de TMDB o un título; si recibe un título, busca y guarda la coincidencia de TMDB.
+      tags:
+        - Aportes
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              anyOf:
+                - required: [tmdbId]
+                - required: [titulo]
+              required: [enlaces]
+              properties:
+                tmdbId:
+                  type: string
+                  pattern: '^[0-9]+$'
+                  description: ID oficial de TMDB (opcional si se envía titulo).
+                  example: '603'
+                titulo:
+                  type: string
+                  minLength: 1
+                  description: Título de la película (opcional si se envía tmdbId).
+                  example: The Matrix
+                tipo:
+                  type: string
+                  enum: [pelicula, tv]
+                  default: pelicula
+                  description: Tipo de contenido cuando se envía tmdbId.
+                enlaces:
+                  type: array
+                  items:
+                    type: object
+                    required: [url, servidor]
+                    properties:
+                      url:
+                        type: string
+                        format: uri
+                      servidor:
+                        type: string
+                        example: WEB
+      responses:
+        '201':
+          description: Aporte creado.
+        '400':
+          description: Debe enviarse un ID o título y una lista de enlaces.
+        '401':
+          description: Se requiere una sesión válida.
+        '404':
+          description: No se encontró la película en TMDB.
+        '500':
+          description: Error al procesar el aporte.
+
   /api/auth/register:
     post:
       summary: Registrar nuevo usuario
@@ -97,3 +155,10 @@ paths:
           description: Multimedia no encontrada en TMDB.
         '500':
           description: Error interno del servidor al comunicarse con TMDB.
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
