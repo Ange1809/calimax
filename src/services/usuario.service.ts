@@ -1,10 +1,17 @@
 ﻿import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { Worker } from 'node:worker_threads';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { prisma } from '../lib/prisma.js';
 import { RegisterUsuarioDto } from '../schemas/usuario.schema.js';
 
 const BCRYPT_SALT_ROUNDS = 10;
+
+// Configuración requerida para resolver rutas de archivos usando ES Modules (ESM)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export class EmailAlreadyRegisteredError extends Error {
   constructor() {
@@ -14,9 +21,46 @@ export class EmailAlreadyRegisteredError extends Error {
 }
 
 export interface UsuarioPublico {
-  id: string; // <-- Cambiado a string para unificarlo con tu base de datos UUID
+  id: string; 
   email: string;
   rol: string;
+}
+
+// =========================================================================
+// FUNCIÓN AUXILIAR ENVOLVEDORA DEL WORKER THREAD (R2.2)
+// =========================================================================
+function hashPasswordWithWorker(password: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    // Apuntamos de forma dinámica al archivo del worker thread según el entorno
+    const isDevelopment = process.env.NODE_ENV === 'development' || !__dirname.includes('dist');
+    
+    // Si estamos en desarrollo leemos el .ts con ts-node, en producción el compilado .js
+    const workerPath = isDevelopment 
+      ? path.resolve(__dirname, '../workers/bcrypt.worker.ts')
+      : path.resolve(__dirname, '../workers/bcrypt.worker.js');
+
+    const worker = new Worker(workerPath, {
+      execArgv: isDevelopment ? ['-r', 'ts-node/register'] : []
+    });
+
+    // Enviamos la información al hilo secundario
+    worker.postMessage({ password, saltRounds: BCRYPT_SALT_ROUNDS });
+
+    // Escuchamos la respuesta final
+    worker.on('message', (response) => {
+      if (response.success) {
+        resolve(response.hash);
+      } else {
+        reject(new Error(response.error));
+      }
+      worker.terminate(); // Destruimos el hilo de forma segura
+    });
+
+    worker.on('error', (err) => {
+      reject(err);
+      worker.terminate();
+    });
+  });
 }
 
 export class UsuarioService {
@@ -29,7 +73,8 @@ export class UsuarioService {
       throw new EmailAlreadyRegisteredError();
     }
 
-    const password_hash = await bcrypt.hash(input.password, BCRYPT_SALT_ROUNDS);
+    // 👈 CAMBIO CRÍTICO: Ahora el hash matemático corre en un hilo secundario independiente (R2.2)
+    const password_hash = await hashPasswordWithWorker(input.password);
 
     const usuario = await prisma.usuario.create({
       data: {
@@ -43,7 +88,6 @@ export class UsuarioService {
       },
     });
 
-    // Mapeo seguro garantizando que el ID se devuelva como string
     return {
       id: String(usuario.id),
       email: usuario.email,

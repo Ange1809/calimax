@@ -3,37 +3,30 @@
 const prisma = new PrismaClient();
 
 export class AporteService {
-  
-  // US5: Guardar un nuevo aporte vinculando el usuarioId directamente
-  async crearAporte(userId: string, tmdbId: string, tipo: string, enlaces: { url: string; servidor: string }[]) {
+  // Crear un nuevo aporte en la base de datos
+  async crearAporte(tmdbId: string, tipo: string, userId: string, enlaces: Array<{ url: string; servidor: string }>) {
     return await prisma.aporte.create({
       data: {
-        tmdbId,
-        tipo,
-        usuarioId: Number(userId), // <-- OpciÃ³n 1: ConexiÃ³n directa y rÃ¡pida
+        tmdbId: String(tmdbId),
+        tipo: String(tipo),
+        usuarioId: Number(userId),
         estado: 'PENDIENTE',
         enlaces: {
-          create: enlaces 
-        }
+          create: enlaces.map((e) => ({
+            url: e.url,
+            servidor: e.servidor,
+          })),
+        },
       },
-      include: { enlaces: true }
+      include: { enlaces: true },
     });
   }
 
-  // US6: Obtener todos los aportes pendientes
-  async obtenerPendientes() {
-    return await prisma.aporte.findMany({
-      where: { estado: 'PENDIENTE' },
-      include: { enlaces: true }
-    });
-  }
-
-  // US6: Cambiar el estado de un aporte usando su id
-  async actualizarEstado(id: string, nuevoEstado: 'PUBLICADO' | 'RECHAZADO') {
+  // Actualizar el estado de un aporte (Panel de moderación)
+  async actualizarEstado(id: string, estado: 'PUBLICADO' | 'RECHAZADO') {
     return await prisma.aporte.update({
       where: { id: Number(id) },
-      data: { estado: nuevoEstado }
+      data: { estado },
     });
   }
 }
-

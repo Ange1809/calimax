@@ -1,5 +1,5 @@
-import cluster from 'cluster';
-import os from 'os';
+import cluster from 'node:cluster';
+import os from 'node:os';
 import app from './app.js';
 
 const PORT = process.env.PORT || 3000;
@@ -13,7 +13,7 @@ if (cluster.isPrimary) {
     cluster.fork();
   }
 
-  cluster.on('exit', (worker, code, signal) => {
+  cluster.on('exit', (worker) => {
     console.log(`Worker ${worker.process.pid} died. Restarting a new one...`);
     cluster.fork();
   });

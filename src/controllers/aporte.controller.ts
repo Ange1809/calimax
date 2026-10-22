@@ -1,4 +1,4 @@
-﻿import { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import type { PrismaClient } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { TMDBService } from '../services/tmdb.service.js';
@@ -13,7 +13,7 @@ export class AporteController {
   async crearAporte(req: any, res: Response) {
     try {
       const { tmdbId, titulo, tipo, enlaces } = req.body ?? {};
-      const usuarioId = req.user?.userId; // ExtraÃ­do de forma segura desde el JWT decodificado
+      const usuarioId = req.user?.userId;
       const tmdbIdValido =
         (typeof tmdbId === 'string' || typeof tmdbId === 'number') &&
         /^\d+$/.test(String(tmdbId).trim());
@@ -24,11 +24,11 @@ export class AporteController {
         !Array.isArray(enlaces) ||
         (tipo !== undefined && tipo !== 'pelicula' && tipo !== 'tv')
       ) {
-        return res.status(400).json({ error: 'Estructura DTO de envÃ­o invÃ¡lida' });
+        return res.status(400).json({ error: 'Estructura DTO de envío inválida' });
       }
 
       if (!usuarioId) {
-        return res.status(401).json({ error: 'SesiÃ³n de usuario no vÃ¡lida o ausente' });
+        return res.status(401).json({ error: 'Sesión de usuario no válida o ausente' });
       }
 
       let idPelicula = tmdbIdValido ? String(tmdbId).trim() : '';
@@ -50,7 +50,7 @@ export class AporteController {
           tmdbId: idPelicula,
           tipo: tipoMultimedia,
           usuarioId: Number(usuarioId),
-          estado: 'PENDIENTE', // Estado inicial obligatorio por DoD
+          estado: 'PENDIENTE',
           enlaces: {
             create: enlaces.map((e: any) => ({
               url: e.url,
@@ -58,18 +58,18 @@ export class AporteController {
             })),
           },
         },
-        include: { enlaces: true }
+        include: { enlaces: true },
       });
 
       return res.status(201).json({
-        data: { ...nuevoAporte, titulo: tituloPelicula }
+        data: { ...nuevoAporte, titulo: tituloPelicula },
       });
-    } catch (error) {
+    } catch {
       return res.status(500).json({ error: 'Error al procesar el aporte' });
     }
   }
 
-  // Cambiar el estado del aporte (Panel de ModeraciÃ³n - US6)
+  // Cambiar el estado del aporte (Panel de Moderación - US6)
   async cambiarEstado(req: Request, res: Response) {
     try {
       const { id } = req.params;
@@ -85,9 +85,8 @@ export class AporteController {
       });
 
       return res.status(200).json({ data: aporteActualizado });
-    } catch (error) {
+    } catch {
       return res.status(404).json({ error: 'Aporte no encontrado' });
     }
   }
 }
-
