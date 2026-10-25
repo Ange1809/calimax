@@ -31,6 +31,95 @@ npm ci
 npx prisma generate
 ```
 
+## Cuentas y roles
+
+- Usuario: registro en `/register`; el inicio de sesión es compartido en `/login`.
+- Publisher: registro en `/publisher/register`; inicia sesión en `/login`. El alta requiere aceptar los términos y añadir al menos un enlace social; los enlaces de perfiles de contenido son opcionales.
+- Moderator y Admin: usan el mismo inicio de sesión `/login` y no se pueden elegir desde el registro público. Sus cuentas se deben provisionar de forma administrativa; la API reserva la moderación para esos roles y permite enviar aportes únicamente a Publisher.
+- El texto de términos mostrado en el formulario Publisher es provisional: debe sustituirse por el texto legal aprobado antes del lanzamiento.
+- No hay mensualidad Publisher. Se otorga un punto por cada aporte aprobado; la calidad es el promedio de las calificaciones de moderación y la actividad diaria refleja un inicio de sesión en las últimas 24 horas.
+- Solo los aportes aprobados aparecen en `/cartelera` y en el perfil público `/publishers/:id`. El email y los enlaces de alojamiento del perfil no son públicos.
+- Cada cuenta autenticada puede abrir `/perfil` para ver su rol y panel, además de editar nombre público, biografía y foto mediante una URL HTTPS externa. La API `GET/PATCH /api/perfil` solo permite consultar o modificar el perfil asociado al token; email y rol no se pueden editar desde allí. Los datos de perfil Publisher se muestran públicamente en la cartelera y su perfil.
+- La navegación principal se mantiene fija para todos los roles: todos conservan Inicio, Catálogo, Cartelera y Mi perfil; Publisher también tiene acceso directo a Enviar contenido y Moderador/Admin a Moderación. El perfil muestra el árbol de accesos adecuado al rol incluso mientras carga sus datos.
+- Moderadores/Admin revisan todos los aportes desde `/staff/moderation`; aprobar requiere una calificación de 1 a 5. El contenido no se publica al enviarlo.
+- Moderator/Admin se asignan desde el editor de tablas de Supabase, modificando `public.Usuario.rol` a `MODERATOR` o `ADMIN`. El registro público rechaza cualquier rol incluido por el cliente. Tras cambiarlo, el usuario debe volver a iniciar sesión para recibir un JWT con el rol actualizado. La contraseña de este backend es el hash de `public.Usuario.password_hash`; cambiar contraseñas en Supabase Auth no afecta estas cuentas personalizadas.
+
+### Ejemplos de solicitudes en Postman
+
+Usa `http://localhost:3000` como URL base en desarrollo y selecciona **Body → raw → JSON**. En las solicitudes protegidas, configura **Authorization → Bearer Token** con el token devuelto por el inicio de sesión correspondiente.
+
+`POST /api/auth/register` — crear cuenta Usuario:
+
+```json
+{
+  "email": "usuario@example.com",
+  "password": "CAMBIAR_POR_UNA_CLAVE_SEGURA"
+}
+```
+
+`POST /api/auth/register/publisher` — crear cuenta Publisher:
+
+```json
+{
+  "email": "publisher@example.com",
+  "password": "CAMBIAR_POR_UNA_CLAVE_SEGURA",
+  "nombrePublico": "Nombre público",
+  "aceptaTerminos": true,
+  "enlacesSociales": [
+    {
+      "plataforma": "Instagram",
+      "url": "https://instagram.com/tu_perfil"
+    }
+  ],
+  "enlacesAlojamiento": [
+    {
+      "plataforma": "Google Drive",
+      "url": "https://drive.google.com/drive/u/0/my-drive"
+    }
+  ]
+}
+```
+
+`enlacesAlojamiento` es opcional; `nombrePublico`, aceptar los términos y al menos un enlace social HTTPS son obligatorios. Usa correos controlados por ti y contraseñas únicas; los valores de ejemplo no son cuentas creadas.
+
+Inicio de sesión compartido para Usuario, Publisher, Moderador y Admin: `POST /api/auth/login`.
+
+Perfil autenticado: `GET /api/perfil` consulta los datos de tu cuenta y `PATCH /api/perfil` actualiza los campos enviados. Ejemplo:
+
+```json
+{
+  "nombrePublico": "Nombre visible",
+  "fotoPerfilUrl": "https://imagenes.example.com/mi-foto.jpg",
+  "biografia": "Una breve descripción."
+}
+```
+
+Cada inicio de sesión recibe este JSON:
+
+```json
+{
+  "email": "tu_correo@example.com",
+  "password": "TU_CLAVE"
+}
+```
+
+`POST /api/aportes` — enviar un aporte como Publisher; siempre queda pendiente:
+
+```json
+{
+  "tmdbId": "603",
+  "tipo": "pelicula",
+  "enlaces": [
+    {
+      "servidor": "Google Drive",
+      "url": "https://drive.google.com/tu_enlace"
+    }
+  ]
+}
+```
+
+Moderación requiere un token de Moderador/Admin: consultar `GET /api/moderacion/pendientes`; aprobar con `PATCH /api/moderacion/:id/estado` y `{"estado":"PUBLICADO","calidad":5,"comentario":"Revisado"}`; o rechazar con `{"estado":"RECHAZADO","comentario":"Motivo"}`.
+
 Edita `.env` y configura al menos:
 
 ```env
@@ -179,16 +268,21 @@ necesario configurar `TMDB_API_KEY`.
 ## Rutas principales
 
 - `POST /api/auth/register`
+- `POST /api/auth/register/publisher`
 - `POST /api/auth/login`
 - `GET /api/metadata/tmdb/:tipo/:id`
 - `POST /api/aportes`
+- `GET /api/publishers/cartelera`
+- `GET /api/publishers/:id`
+- `GET /api/perfil`
+- `PATCH /api/perfil`
 - `GET /api/moderacion/pendientes`
 - `PATCH /api/moderacion/:id/estado`
 - `GET /api/catalogo`
 - `POST /api/catalogo/enlaces/:linkId/reportar`
 
 Las rutas protegidas requieren `Authorization: Bearer <token>`. El panel de
-moderación requiere el rol `MODERATOR`.
+moderación requiere el rol `MODERATOR` o `ADMIN`.
 
 ## Pruebas y calidad
 
@@ -214,10 +308,8 @@ npm test -- --watch=false
 El workflow de GitHub Actions ejecuta instalación reproducible, compilación,
 lint, formato y pruebas BDD en cada push a `main` y en cada pull request.
 
-El build de Angular se valida con `npm run build` dentro de `frontend`. Las
-pruebas Angular existentes requieren completar la configuración de TestBed para
-algunos componentes que dependen de `ActivatedRoute`; esos fallos no impiden
-levantar la aplicación ni afectan las pruebas del backend.
+El build y las pruebas de Angular se validan desde `frontend` con los comandos
+anteriores.
 
 ## Arquitectura
 

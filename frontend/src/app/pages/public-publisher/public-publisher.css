@@ -1,0 +1,95 @@
+.profile-page {
+  min-height: 100vh;
+  padding: 24px;
+  background: #0f0f14;
+  color: #ffffff;
+}
+
+.profile-page > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 920px;
+  margin: 0 auto 28px;
+}
+
+.profile-page a {
+  color: #93c5fd;
+}
+
+.brand {
+  color: #ffffff !important;
+  font-size: 20px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.brand span {
+  color: #e50914;
+}
+
+.profile-card,
+.published {
+  max-width: 920px;
+  margin: 20px auto;
+  padding: 24px;
+  border: 1px solid #33333d;
+  border-radius: 13px;
+  background: #18181f;
+}
+
+.eyebrow {
+  color: #e50914;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.profile-card p,
+.published p {
+  color: #c0c0c8;
+}
+
+.publisher-avatar {
+  display: block;
+  width: 112px;
+  height: 112px;
+  margin: 16px 0;
+  border: 2px solid #e50914;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.socials {
+  display: flex;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.published article {
+  margin-top: 16px;
+  padding: 18px;
+  border-radius: 9px;
+  background: #22232b;
+}
+
+.published article span {
+  color: #fb7185;
+  font-size: 12px;
+}
+
+.published article ul {
+  display: flex;
+  gap: 16px;
+  padding-left: 18px;
+}
+
+.published article li a {
+  overflow-wrap: anywhere;
+}
+
+.error {
+  max-width: 920px;
+  margin: 40px auto;
+  color: #ff777f;
+}

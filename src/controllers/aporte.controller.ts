@@ -1,7 +1,27 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { z } from 'zod';
 import type { PrismaClient } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { TMDBService } from '../services/tmdb.service.js';
+
+const aporteSchema = z.object({
+  tmdbId: z.union([
+    z.string().regex(/^\d+$/),
+    z.number().int().positive(),
+  ]).optional(),
+  titulo: z.string().trim().min(1).max(200).optional(),
+  tipo: z.enum(['pelicula', 'tv']).optional(),
+  enlaces: z.array(z.object({
+    url: z.string().url().max(2048).refine((value) => value.startsWith('https://')),
+    servidor: z.string().trim().min(1).max(60),
+  }).strict()).min(1).max(10),
+}).strict().refine(
+  (data) => data.tmdbId !== undefined || data.titulo !== undefined,
+  { message: 'Se requiere un ID de TMDB o título' },
+).refine(
+  (data) => data.tipo !== 'tv' || data.tmdbId !== undefined,
+  { message: 'Las series requieren un ID de TMDB' },
+);
 
 export class AporteController {
   constructor(
@@ -12,31 +32,24 @@ export class AporteController {
   // Crear un aporte con sus respectivos enlaces vinculados (US5)
   async crearAporte(req: any, res: Response) {
     try {
-      const { tmdbId, titulo, tipo, enlaces } = req.body ?? {};
-      const usuarioId = req.user?.userId;
-      const tmdbIdValido =
-        (typeof tmdbId === 'string' || typeof tmdbId === 'number') &&
-        /^\d+$/.test(String(tmdbId).trim());
-      const tituloValido = typeof titulo === 'string' && titulo.trim().length > 0;
-
-      if (
-        (!tmdbIdValido && !tituloValido) ||
-        !Array.isArray(enlaces) ||
-        (tipo !== undefined && tipo !== 'pelicula' && tipo !== 'tv')
-      ) {
+      const parsed = aporteSchema.safeParse(req.body ?? {});
+      if (!parsed.success) {
         return res.status(400).json({ error: 'Estructura DTO de envío inválida' });
       }
+
+      const { tmdbId, titulo, tipo, enlaces } = parsed.data;
+      const usuarioId = req.user?.userId;
 
       if (!usuarioId) {
         return res.status(401).json({ error: 'Sesión de usuario no válida o ausente' });
       }
 
-      let idPelicula = tmdbIdValido ? String(tmdbId).trim() : '';
-      let tituloPelicula = tituloValido ? titulo.trim() : null;
+      let idPelicula = tmdbId === undefined ? '' : String(tmdbId).trim();
+      let tituloPelicula = titulo ?? null;
       let tipoMultimedia: 'pelicula' | 'tv' = tipo ?? 'pelicula';
 
-      if (!tmdbIdValido) {
-        const pelicula = await this.tmdbService.buscarPeliculaPorTitulo(titulo.trim());
+      if (tmdbId === undefined && titulo !== undefined) {
+        const pelicula = await this.tmdbService.buscarPeliculaPorTitulo(titulo);
         if (!pelicula) {
           return res.status(404).json({ error: 'Película no encontrada en TMDB' });
         }
@@ -48,11 +61,12 @@ export class AporteController {
       const nuevoAporte = await this.database.aporte.create({
         data: {
           tmdbId: idPelicula,
+          titulo: tituloPelicula,
           tipo: tipoMultimedia,
           usuarioId: Number(usuarioId),
           estado: 'PENDIENTE',
           enlaces: {
-            create: enlaces.map((e: any) => ({
+            create: enlaces.map((e) => ({
               url: e.url,
               servidor: e.servidor,
             })),
@@ -64,44 +78,10 @@ export class AporteController {
       return res.status(201).json({
         data: { ...nuevoAporte, titulo: tituloPelicula },
       });
-    } catch {
+    } catch (error) {
+      console.error('Error al procesar el aporte:', error);
       return res.status(500).json({ error: 'Error al procesar el aporte' });
     }
   }
 
-  // Cambiar el estado del aporte (Panel de Moderación - US6)
-  async cambiarEstado(req: Request, res: Response) {
-    try {
-      const { id } = req.params;
-      const { estado } = req.body;
-
-      if (estado !== 'PUBLICADO' && estado !== 'RECHAZADO') {
-        return res.status(400).json({ error: 'El estado solo acepta PUBLICADO o RECHAZADO' });
-      }
-
-      const aporteActualizado = await this.database.aporte.update({
-        where: { id: Number(id) },
-        data: { estado },
-      });
-
-      return res.status(200).json({ data: aporteActualizado });
-    } catch {
-      return res.status(404).json({ error: 'Aporte no encontrado' });
-    }
-  }
-
-  async listarPendientes(_req: Request, res: Response) {
-    try {
-      const aportes = await this.database.aporte.findMany({
-        where: { estado: 'PENDIENTE' },
-        include: { enlaces: true, usuario: true },
-        orderBy: { id: 'asc' },
-      });
-
-      return res.status(200).json({ data: aportes });
-    } catch (error) {
-      console.error('Error al listar aportes pendientes:', error);
-      return res.status(500).json({ error: 'Error interno del servidor' });
-    }
-  }
 }

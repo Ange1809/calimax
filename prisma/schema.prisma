@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -10,24 +10,50 @@ datasource db {
 }
 
 model Usuario {
-  id            Int      @id @default(autoincrement())
-  email         String   @unique
-  password_hash String
-  rol           Rol      @default(USER)
-  createdAt     DateTime @default(now())
-  aportes       Aporte[]
+  id                       Int             @id @default(autoincrement())
+  email                    String          @unique
+  password_hash            String
+  rol                      Rol             @default(USER)
+  nombrePublico            String?
+  fotoPerfilUrl            String?         @db.VarChar(2048)
+  biografia                String?         @db.VarChar(280)
+  puntosAporte             Int             @default(0)
+  calidadPromedio          Float?
+  ultimoAcceso             DateTime?
+  createdAt                DateTime        @default(now())
+  aportes                  Aporte[]
+  aportesModerados         Aporte[]        @relation("AporteModerador")
+  publisherLinks           PublisherLink[]
+  publisherTermsAcceptedAt DateTime?
+}
+
+model PublisherLink {
+  id         Int                      @id @default(autoincrement())
+  usuarioId  Int
+  categoria  CategoriaEnlacePublisher
+  plataforma String
+  url        String
+  usuario    Usuario                  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId, categoria])
 }
 
 model Aporte {
-  id        Int          @id @default(autoincrement())
-  tmdbId    String
-  tipo      String
-  estado    EstadoAporte @default(PENDIENTE)
-  usuarioId Int
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  usuario   Usuario      @relation(fields: [usuarioId], references: [id])
-  enlaces   Enlace[]
+  id                   Int          @id @default(autoincrement())
+  tmdbId               String
+  titulo               String?
+  tipo                 String
+  estado               EstadoAporte @default(PENDIENTE)
+  usuarioId            Int
+  calidadModeracion    Int?
+  moderadoPorId        Int?
+  moderadoEn           DateTime?
+  comentarioModeracion String?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+  usuario              Usuario      @relation(fields: [usuarioId], references: [id])
+  moderadoPor          Usuario?     @relation("AporteModerador", fields: [moderadoPorId], references: [id])
+  enlaces              Enlace[]
 }
 
 model Enlace {
@@ -43,7 +69,14 @@ model Enlace {
 
 enum Rol {
   USER
+  PUBLISHER
   MODERATOR
+  ADMIN
+}
+
+enum CategoriaEnlacePublisher {
+  SOCIAL
+  ALOJAMIENTO
 }
 
 enum EstadoAporte {

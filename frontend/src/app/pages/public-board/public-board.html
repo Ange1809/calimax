@@ -1,0 +1,46 @@
+<main class="board-page">
+  <section class="board-content">
+    <span class="eyebrow">CONTENIDO REVISADO</span>
+    <h1>Cartelera de la comunidad</h1>
+    <p class="intro">Cada aporte de esta cartelera fue aprobado por moderación.</p>
+
+    @if (cargando) {
+      <p class="state">Cargando cartelera…</p>
+    } @else if (error) {
+      <p class="state error">{{ error }}</p>
+    } @else if (items.length === 0) {
+      <p class="state">Todavía no hay aportes publicados.</p>
+    } @else {
+      <section class="board-grid">
+        @for (item of items; track item.id) {
+          <article class="content-card">
+            <span class="content-type">{{ item.tipo === 'tv' ? 'SERIE' : 'PELÍCULA' }}</span>
+            <h2>{{ item.titulo || 'Contenido TMDB ' + item.tmdbId }}</h2>
+            <p class="published-date">Publicado {{ item.publicadoEn | date:'mediumDate' }}</p>
+            <a class="publisher" [routerLink]="['/publishers', item.publisher.id]">
+              @if (item.publisher.fotoPerfilUrl) {
+                <img class="publisher-avatar" [src]="item.publisher.fotoPerfilUrl" alt="" />
+              }
+              {{ item.publisher.nombrePublico || 'Publisher' }}
+            </a>
+            <p class="stats">
+              {{ item.publisher.puntosAporte }} puntos
+              · calidad {{ item.publisher.calidadPromedio === null ? 'Sin calificar' : (item.publisher.calidadPromedio | number:'1.1-1') + '/5' }}
+              · {{ item.publisher.activoDiariamente ? 'Activo en las últimas 24 h' : 'No activo hoy' }}
+            </p>
+            <div class="socials">
+              @for (red of item.publisher.redes; track red.url) {
+                <a [href]="red.url" target="_blank" rel="noopener noreferrer">{{ red.plataforma }}</a>
+              }
+            </div>
+            <ul class="content-links">
+              @for (enlace of item.enlaces; track enlace.id) {
+                <li><a [href]="enlace.url" target="_blank" rel="noopener noreferrer">{{ enlace.servidor }}</a></li>
+              }
+            </ul>
+          </article>
+        }
+      </section>
+    }
+  </section>
+</main>

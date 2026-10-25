@@ -10,12 +10,15 @@ import tmdbRoutes from './routes/tmdb.routes.js';
 import usuarioRoutes from './routes/usuario.routes.js';
 import aporteRoutes from './routes/aporte.routes.js';
 import catalogoRoutes from './routes/catalogo.routes.js';
+import moderationRoutes from './routes/moderation.routes.js';
+import publisherRoutes from './routes/publisher.routes.js';
+import perfilRoutes from './routes/perfil.routes.js';
 
 const app = express();
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  origin: ['http://localhost:4200', 'http://localhost:5173', 'http://localhost:3000'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
@@ -52,6 +55,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use('/api/auth', authLimiter, usuarioRoutes);
 app.use('/api/aportes', aporteRoutes);
+app.use('/api/moderacion', moderationRoutes);
+app.use('/api/publishers', publisherRoutes);
+app.use('/api/perfil', perfilRoutes);
 app.use('/api/metadata', tmdbRoutes);
 app.use('/api', aporteRoutes);
 

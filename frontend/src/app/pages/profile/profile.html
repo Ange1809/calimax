@@ -1,0 +1,114 @@
+<main class="profile-page">
+  <section class="role-panel">
+    <span class="eyebrow">PANEL {{ rolEtiqueta }}</span>
+    <h2>Accesos de tu cuenta</h2>
+    <div class="panel-links">
+      <a routerLink="/home">Inicio</a>
+      <a routerLink="/catalogo">Explorar contenido</a>
+      <a routerLink="/cartelera">Ver cartelera comunitaria</a>
+      @if (rol === 'PUBLISHER') {
+        <a routerLink="/publisher/upload">Enviar un aporte a moderación</a>
+        @if (perfil) {
+          <a [routerLink]="['/publishers', perfil.id]">Ver perfil público</a>
+        }
+      }
+      @if (rol === 'MODERATOR' || rol === 'ADMIN') {
+        <a routerLink="/staff/moderation">Abrir bandeja de moderación</a>
+      }
+    </div>
+  </section>
+
+  @if (cargando) {
+    <p class="notice" role="status">Cargando los datos de tu perfil…</p>
+  }
+  @if (!cargando && error) {
+    <div class="load-error" role="alert">
+      <p>{{ error }}</p>
+      <button type="button" (click)="cargarPerfil()">Reintentar</button>
+    </div>
+  }
+
+  @if (perfil) {
+    <section class="profile-layout">
+      <article class="profile-card">
+        <div class="avatar">
+          @if (perfil.fotoPerfilUrl && !fotoInvalida) {
+            <img [src]="perfil.fotoPerfilUrl" alt="Foto de perfil" (error)="marcarFotoInvalida()" />
+          } @else {
+            <span>{{ nombreVisible.charAt(0).toUpperCase() }}</span>
+          }
+        </div>
+        <span class="role-badge">{{ perfil.rol }}</span>
+        <h1>{{ nombreVisible }}</h1>
+        <p class="email">{{ perfil.email }}</p>
+        @if (perfil.biografia) {
+          <p class="biography">{{ perfil.biografia }}</p>
+        }
+        @if (perfil.rol === 'PUBLISHER') {
+          <div class="publisher-stats">
+            <span>{{ perfil.puntosAporte }} puntos de aporte</span>
+            <span>
+              Calidad:
+              {{ perfil.calidadPromedio === null ? 'Sin calificar' : (perfil.calidadPromedio | number:'1.1-1') + '/5' }}
+            </span>
+          </div>
+          <div class="social-links">
+            @for (red of redesSociales; track red.url) {
+              <a [href]="red.url" target="_blank" rel="noopener noreferrer">{{ red.plataforma }}</a>
+            }
+          </div>
+        }
+      </article>
+
+      <section class="settings-card">
+        <span class="eyebrow">CUENTA Y PERSONALIZACIÓN</span>
+        <h2>Editar perfil</h2>
+        <form (ngSubmit)="guardar()" novalidate>
+          <label for="nombre-publico">Nombre público</label>
+          <input
+            id="nombre-publico"
+            name="nombrePublico"
+            type="text"
+            [(ngModel)]="nombrePublico"
+            maxlength="60"
+            placeholder="Cómo aparecerás en tu perfil"
+          />
+
+          <label for="foto-perfil">Foto de perfil (URL HTTPS)</label>
+          <input
+            id="foto-perfil"
+            name="fotoPerfilUrl"
+            type="url"
+            [(ngModel)]="fotoPerfilUrl"
+            maxlength="2048"
+            placeholder="https://..."
+          />
+          <p class="help-text">La imagen debe estar alojada en una URL pública HTTPS.</p>
+
+          <label for="biografia">Biografía</label>
+          <textarea
+            id="biografia"
+            name="biografia"
+            [(ngModel)]="biografia"
+            maxlength="280"
+            rows="4"
+            placeholder="Contá algo sobre vos"
+          ></textarea>
+          <span class="help-text">{{ biografia.length }}/280 caracteres</span>
+
+          <button type="submit" [disabled]="guardando">
+            {{ guardando ? 'Guardando…' : 'Guardar cambios' }}
+          </button>
+        </form>
+
+        @if (mensaje) {
+          <p class="success-message" role="status">{{ mensaje }}</p>
+        }
+        @if (error) {
+          <p class="error-message" role="alert">{{ error }}</p>
+        }
+      </section>
+    </section>
+
+  }
+</main>

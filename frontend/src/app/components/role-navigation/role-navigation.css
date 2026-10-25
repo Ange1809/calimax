@@ -1,0 +1,88 @@
+:host {
+  display: block;
+}
+
+.role-navigation {
+  position: sticky;
+  z-index: 100;
+  top: 0;
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  gap: 24px;
+  padding: 10px clamp(16px, 5vw, 64px);
+  border-bottom: 1px solid #30303a;
+  background: rgba(24, 24, 31, 0.97);
+  box-sizing: border-box;
+  color: #f5f5f7;
+}
+
+.brand {
+  flex: 0 0 auto;
+  color: #fff;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-decoration: none;
+}
+
+.brand span {
+  color: #e50914;
+}
+
+nav {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: clamp(10px, 2vw, 24px);
+}
+
+nav a {
+  color: #d0d0d5;
+  font-size: 14px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+nav a:hover,
+nav a:focus-visible {
+  color: #fff;
+}
+
+.role-tag {
+  margin-left: 4px;
+  color: #f35b64;
+  font-size: 11px;
+}
+
+.logout-button {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  border: 1px solid #41414d;
+  border-radius: 7px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  border-color: #e50914;
+}
+
+@media (max-width: 760px) {
+  .role-navigation {
+    position: relative;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  nav {
+    order: 3;
+    flex-basis: 100%;
+    flex-wrap: wrap;
+  }
+
+  .logout-button {
+    margin-left: auto;
+  }
+}

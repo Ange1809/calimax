@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { prisma } from '../lib/prisma.js';
-import { RegisterUsuarioDto } from '../schemas/usuario.schema.js';
+import { RegisterPublisherDto, RegisterUsuarioDto } from '../schemas/usuario.schema.js';
 
 const BCRYPT_SALT_ROUNDS = 10;
 
@@ -65,6 +65,56 @@ function hashPasswordWithWorker(password: string): Promise<string> {
 
 export class UsuarioService {
   async registrar(input: RegisterUsuarioDto): Promise<UsuarioPublico> {
+    return this.crearUsuario(input, 'USER');
+  }
+
+  async registrarPublisher(input: RegisterPublisherDto): Promise<UsuarioPublico> {
+    const existente = await prisma.usuario.findUnique({
+      where: { email: input.email },
+    });
+
+    if (existente !== null) {
+      throw new EmailAlreadyRegisteredError();
+    }
+
+    const password_hash = await hashPasswordWithWorker(input.password);
+    const usuario = await prisma.usuario.create({
+      data: {
+        email: input.email,
+        password_hash,
+        rol: 'PUBLISHER',
+        nombrePublico: input.nombrePublico,
+        publisherTermsAcceptedAt: new Date(),
+        publisherLinks: {
+          create: [
+            ...input.enlacesSociales.map((link) => ({
+              categoria: 'SOCIAL' as const,
+              plataforma: link.plataforma,
+              url: link.url,
+            })),
+            ...input.enlacesAlojamiento.map((link) => ({
+              categoria: 'ALOJAMIENTO' as const,
+              plataforma: link.plataforma,
+              url: link.url,
+            })),
+          ],
+        },
+      },
+      select: {
+        id: true,
+        email: true,
+        rol: true,
+      },
+    });
+
+    return {
+      id: String(usuario.id),
+      email: usuario.email,
+      rol: String(usuario.rol),
+    };
+  }
+
+  private async crearUsuario(input: RegisterUsuarioDto, rol: 'USER'): Promise<UsuarioPublico> {
     const existente = await prisma.usuario.findUnique({
       where: { email: input.email },
     });
@@ -80,6 +130,7 @@ export class UsuarioService {
       data: {
         email: input.email,
         password_hash,
+        rol,
       },
       select: {
         id: true,
@@ -101,13 +152,18 @@ export class UsuarioService {
     });
 
     if (!usuario) {
-      throw new Error("CREDENCIALES_INVALIDAS");
+      throw new Error('CREDENCIALES_INVALIDAS');
     }
 
     const passwordValida = await bcrypt.compare(input.password, usuario.password_hash);
     if (!passwordValida) {
-      throw new Error("CREDENCIALES_INVALIDAS");
+      throw new Error('CREDENCIALES_INVALIDAS');
     }
+
+    await prisma.usuario.update({
+      where: { id: usuario.id },
+      data: { ultimoAcceso: new Date() },
+    });
 
     const token = jwt.sign(
       { userId: String(usuario.id), rol: usuario.rol },

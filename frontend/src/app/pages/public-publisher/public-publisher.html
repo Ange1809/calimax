@@ -1,0 +1,45 @@
+<main class="profile-page">
+  @if (perfil) {
+    <section class="profile-card">
+      <span class="eyebrow">PUBLISHER DE CALIMAX</span>
+      @if (perfil.fotoPerfilUrl) {
+        <img class="publisher-avatar" [src]="perfil.fotoPerfilUrl" alt="Foto de perfil del Publisher" />
+      }
+      <h1>{{ perfil.nombrePublico || 'Publisher' }}</h1>
+      @if (perfil.biografia) {
+        <p>{{ perfil.biografia }}</p>
+      }
+      <p>{{ perfil.puntosAporte }} puntos de aporte</p>
+      <p>
+        Calidad promedio:
+        {{ perfil.calidadPromedio === null ? 'Sin calificar' : (perfil.calidadPromedio | number:'1.1-1') + '/5' }}
+      </p>
+      <p>{{ perfil.activoDiariamente ? 'Activo en las últimas 24 horas' : 'No activo en las últimas 24 horas' }}</p>
+      <div class="socials">
+        @for (red of perfil.redes; track red.url) {
+          <a [href]="red.url" target="_blank" rel="noopener noreferrer">{{ red.plataforma }}</a>
+        }
+      </div>
+    </section>
+
+    <section class="published">
+      <h2>Aportes publicados</h2>
+      @for (aporte of perfil.aportes; track aporte.id) {
+        <article>
+          <span>{{ aporte.tipo === 'tv' ? 'Serie' : 'Película' }}</span>
+          <h3>{{ aporte.titulo || 'Contenido TMDB ' + aporte.tmdbId }}</h3>
+          <p>Actualizado {{ aporte.updatedAt | date:'mediumDate' }}</p>
+          <ul>
+            @for (enlace of aporte.enlaces; track enlace.id) {
+              <li><a [href]="enlace.url" target="_blank" rel="noopener noreferrer">{{ enlace.servidor }}</a></li>
+            }
+          </ul>
+        </article>
+      } @empty {
+        <p>Aún no tiene aportes publicados.</p>
+      }
+    </section>
+  } @else if (error) {
+    <p class="error">{{ error }}</p>
+  }
+</main>

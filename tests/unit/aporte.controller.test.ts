@@ -18,7 +18,7 @@ describe('AporteController', () => {
     >;
     const controller = new AporteController(database, tmdbService);
     const req: any = {
-      body: { tmdbId: '603', enlaces: [] },
+      body: { tmdbId: '603', enlaces: [{ url: 'https://example.com', servidor: 'WEB' }] },
       user: { userId: '1' }
     };
     const res: any = { status: jest.fn().mockReturnThis(), json: jest.fn() };
@@ -82,7 +82,10 @@ describe('AporteController', () => {
     } as unknown as Pick<TMDBService, 'buscarPeliculaPorTitulo'>;
     const controller = new AporteController(database, tmdbService);
     const req: any = {
-      body: { titulo: 'Título inexistente', enlaces: [] },
+      body: {
+        titulo: 'Título inexistente',
+        enlaces: [{ url: 'https://example.com', servidor: 'WEB' }]
+      },
       user: { userId: '42' }
     };
     const res: any = { status: jest.fn().mockReturnThis(), json: jest.fn() };
