@@ -166,7 +166,7 @@ export class UsuarioService {
     });
 
     const token = jwt.sign(
-      { id: usuario.id, rol: usuario.rol },
+      { userId: String(usuario.id), rol: usuario.rol },
       process.env.JWT_SECRET!,
       { expiresIn: '15m' }
     );

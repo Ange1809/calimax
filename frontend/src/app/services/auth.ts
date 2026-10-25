@@ -20,7 +20,7 @@ interface LoginResponse {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class Auth {
   private apiUrl = '/api/auth';

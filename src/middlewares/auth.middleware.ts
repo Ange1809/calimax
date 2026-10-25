@@ -14,7 +14,7 @@ export const verificarJWT = (req: any, res: Response, next: NextFunction) => {
   const token = authHeader.split(' ')[1];
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as jwt.JwtPayload;
-    const id = decoded.id;
+    const id = decoded.userId ?? decoded.id;
     const userId =
       typeof id === 'number' && Number.isSafeInteger(id) && id > 0
         ? String(id)

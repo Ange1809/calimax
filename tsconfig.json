@@ -9,6 +9,7 @@
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist"
   },
+  "exclude": ["frontend", "dist", "node_modules"],
   "ts-node": {
     "esm": true
   }
