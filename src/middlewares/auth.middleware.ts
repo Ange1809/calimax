@@ -33,9 +33,9 @@ export const verificarJWT = (req: any, res: Response, next: NextFunction) => {
   }
 };
 
-export const requerirRol = (role: string) => {
+export const requerirRol = (...roles: string[]) => {
   return (req: any, res: Response, next: NextFunction) => {
-    if (!req.user || req.user.rol !== role) {
+    if (!req.user || !roles.includes(req.user.rol)) {
       return res.status(403).json({ error: 'Prohibido: Permisos insuficientes' });
     }
     next();

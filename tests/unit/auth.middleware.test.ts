@@ -1,12 +1,37 @@
 import { jest } from '@jest/globals';
 import jwt from 'jsonwebtoken';
-import { verificarJWT } from '../../src/middlewares/auth.middleware.js';
+import { requerirRol, verificarJWT } from '../../src/middlewares/auth.middleware.js';
 
 describe('verificarJWT', () => {
   const secretAnterior = process.env.JWT_SECRET;
 
   beforeEach(() => {
     process.env.JWT_SECRET = 'test-secret';
+  });
+
+  describe('requerirRol', () => {
+    it('permite moderación a Moderator y Admin', () => {
+      for (const rol of ['MODERATOR', 'ADMIN']) {
+        const req: any = { user: { userId: '1', rol } };
+        const res: any = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const next = jest.fn();
+
+        requerirRol('MODERATOR', 'ADMIN')(req, res, next);
+
+        expect(next).toHaveBeenCalledTimes(1);
+      }
+    });
+
+    it('rechaza a los usuarios sin el rol requerido', () => {
+      const req: any = { user: { userId: '1', rol: 'USER' } };
+      const res: any = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+      const next = jest.fn();
+
+      requerirRol('PUBLISHER')(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(next).not.toHaveBeenCalled();
+    });
   });
 
   afterAll(() => {

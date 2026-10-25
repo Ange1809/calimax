@@ -1,0 +1,164 @@
+.publisher-page {
+  min-height: 100vh;
+  background: #0f0f14;
+  color: #ffffff;
+}
+
+.navbar {
+  min-height: 70px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 12px 5%;
+  background: #18181f;
+  border-bottom: 1px solid #292931;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.logo strong,
+.eyebrow {
+  color: #e50914;
+}
+
+.navbar nav {
+  display: flex;
+  gap: 24px;
+  flex: 1;
+}
+
+.navbar a {
+  color: #b8b8c0;
+  text-decoration: none;
+}
+
+.logout-button,
+.secondary-button {
+  padding: 9px 14px;
+  border: 1px solid #3a3a44;
+  border-radius: 7px;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.logout-button:hover,
+.secondary-button:hover {
+  border-color: #e50914;
+}
+
+.upload-card {
+  width: min(100% - 32px, 640px);
+  margin: 48px auto;
+  padding: 36px;
+  border-radius: 16px;
+  background: #18181f;
+  box-sizing: border-box;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+h1 {
+  margin: 12px 0 6px;
+}
+
+.subtitle,
+.links-section h2 {
+  color: #a5a5ad;
+}
+
+.form-group {
+  margin: 18px 0;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #33333d;
+  border-radius: 8px;
+  background: #24242d;
+  color: #ffffff;
+  box-sizing: border-box;
+}
+
+.links-section {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid #33333d;
+}
+
+.links-section h2 {
+  font-size: 18px;
+}
+
+.link-row {
+  margin: 20px 0;
+  padding: 14px;
+  border-radius: 10px;
+  background: #202028;
+}
+
+.submit-button {
+  width: 100%;
+  margin-top: 24px;
+  padding: 14px;
+  border: 0;
+  border-radius: 8px;
+  background: #e50914;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.submit-button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.success-message,
+.error-message {
+  margin-top: 18px;
+  text-align: center;
+}
+
+.success-message {
+  color: #4ade80;
+}
+
+.error-message {
+  color: #ff4d5a;
+}
+
+@media (max-width: 560px) {
+  .navbar {
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .navbar nav {
+    order: 3;
+    width: 100%;
+  }
+
+  .upload-card {
+    margin: 20px auto;
+    padding: 24px;
+  }
+}

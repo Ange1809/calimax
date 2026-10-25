@@ -10,7 +10,7 @@
 
 .register-card {
   width: 100%;
-  max-width: 420px;
+  max-width: 560px;
   background: #18181f;
   padding: 40px;
   border-radius: 18px;
@@ -74,6 +74,71 @@ input::placeholder {
   color: #777780;
 }
 
+.publisher-fields {
+  margin: 28px 0;
+  padding-top: 22px;
+  border-top: 1px solid #33333d;
+}
+
+.publisher-fields h2,
+.publisher-fields h3 {
+  color: #ffffff;
+  margin: 18px 0 8px;
+}
+
+.publisher-fields h2 {
+  font-size: 20px;
+}
+
+.publisher-fields h3 {
+  font-size: 16px;
+}
+
+.section-help,
+.terms p {
+  color: #a5a5ad;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.link-row {
+  margin: 16px 0;
+}
+
+.secondary-button {
+  width: auto;
+  padding: 9px 12px;
+  background: #30303a;
+  font-size: 13px;
+}
+
+.secondary-button:hover {
+  background: #41414d;
+}
+
+.terms {
+  margin-top: 20px;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.terms summary {
+  cursor: pointer;
+}
+
+.terms-accept {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 14px 0;
+  line-height: 1.4;
+}
+
+.terms-accept input {
+  width: auto;
+  margin-top: 2px;
+}
+
 button {
   width: 100%;
   padding: 14px;
@@ -89,6 +154,25 @@ button {
 
 button:hover {
   background: #f40612;
+}
+
+button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.success-message {
+  text-align: center;
+  color: #4ade80;
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.error-message {
+  text-align: center;
+  color: #ff4d5a;
+  margin-top: 20px;
+  font-size: 14px;
 }
 
 .login-text {

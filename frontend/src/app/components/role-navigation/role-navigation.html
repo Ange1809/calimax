@@ -1,0 +1,27 @@
+@if (autenticado) {
+  <header class="role-navigation">
+    <a class="brand" routerLink="/home" aria-label="Calimax, inicio">CALI<span>MAX</span></a>
+    <nav aria-label="Navegación principal">
+      <a routerLink="/home">Inicio</a>
+      <a routerLink="/catalogo">Catálogo</a>
+      <a routerLink="/cartelera">Cartelera</a>
+      @if (rol === 'PUBLISHER') {
+        <a routerLink="/publisher/upload">Enviar contenido</a>
+      }
+      @if (esEquipo) {
+        <a routerLink="/staff/moderation">Moderación</a>
+      }
+      <a routerLink="/perfil">Mi perfil <span class="role-tag">{{ etiquetaRol }}</span></a>
+    </nav>
+    <button type="button" class="logout-button" (click)="cerrarSesion()">Cerrar sesión</button>
+  </header>
+} @else {
+  <header class="role-navigation guest-navigation">
+    <a class="brand" routerLink="/login" aria-label="Calimax">CALI<span>MAX</span></a>
+    <nav aria-label="Navegación pública">
+      <a routerLink="/cartelera">Cartelera comunitaria</a>
+      <a routerLink="/register">Crear cuenta</a>
+      <a routerLink="/login">Iniciar sesión</a>
+    </nav>
+  </header>
+}

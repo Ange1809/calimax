@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Auth } from '../../services/auth';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
@@ -31,7 +31,13 @@ export class Login {
         this.mensaje = 'Inicio de sesión exitoso.';
 
         setTimeout(() => {
-          this.router.navigate(['/home']);
+          this.router.navigate([
+            respuesta.usuario.rol === 'PUBLISHER'
+              ? '/publisher/upload'
+              : respuesta.usuario.rol === 'MODERATOR' || respuesta.usuario.rol === 'ADMIN'
+                ? '/staff/moderation'
+                : '/home'
+          ]);
         }, 500);
       },
       error: (error) => {
