@@ -16,6 +16,8 @@ import perfilRoutes from './routes/perfil.routes.js';
 
 const app = express();
 
+app.set('trust proxy', 1);
+
 app.use(cors({
   origin: ['http://localhost:4200', 'http://localhost:5173', 'http://localhost:3000'],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
@@ -50,8 +52,12 @@ const reportLimiter = rateLimit({
 
 app.use(globalLimiter);
 
-const swaggerDocument = YAML.load(path.resolve('swagger.yaml'));
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+try {
+  const swaggerDocument = YAML.load(path.resolve('swagger.yaml'));
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+} catch {
+  console.warn('swagger.yaml no disponible; /api-docs deshabilitado');
+}
 
 app.use('/api/auth', authLimiter, usuarioRoutes);
 app.use('/api/aportes', aporteRoutes);

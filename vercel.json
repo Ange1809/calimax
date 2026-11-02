@@ -1,0 +1,20 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "api": {
+      "root": ".",
+      "framework": "express",
+      "entrypoint": "src/vercel.ts"
+    },
+    "frontend": {
+      "root": "frontend",
+      "framework": "angular"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": { "service": "api" } },
+    { "source": "/api-docs", "destination": { "service": "api" } },
+    { "source": "/api-docs/(.*)", "destination": { "service": "api" } },
+    { "source": "/(.*)", "destination": { "service": "frontend" } }
+  ]
+}

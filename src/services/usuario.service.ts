@@ -1,6 +1,7 @@
 ﻿import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { Worker } from 'node:worker_threads';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -39,6 +40,12 @@ function hashPasswordWithWorker(password: string): Promise<string> {
       ? path.resolve(__dirname, '../workers/bcrypt.worker.ts')
       : path.resolve(__dirname, '../workers/bcrypt.worker.js');
 
+    // En Vercel el worker no se empaqueta junto a la función; bcrypt ya es asíncrono.
+    if (process.env.VERCEL || !fs.existsSync(workerPath)) {
+      resolve(bcrypt.hash(password, BCRYPT_SALT_ROUNDS));
+      return;
+    }
+
     const worker = new Worker(workerPath, {
       execArgv: isDevelopment ? ['-r', 'ts-node/register'] : []
     });
@@ -59,6 +66,10 @@ function hashPasswordWithWorker(password: string): Promise<string> {
     worker.on('error', (err) => {
       reject(err);
       worker.terminate();
+    });
+
+    worker.on('exit', () => {
+      reject(new Error('bcrypt worker terminó sin devolver un hash'));
     });
   });
 }
